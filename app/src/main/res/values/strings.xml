@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">AuthIO</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+
+    <string name="pref_file">com.example.preference_file</string>
+    <string name="pref_login_status">com.example.preference_login_status</string>
+    <string name="pref_username">com.example.preference_username</string>
+    <string name="pref_description">com.example.preference_description</string>
+
+    <string name="username_hint">Enter Username</string>
+    <string name="password_hint">Enter Password</string>
+    <string name="description_hint">Enter Description</string>
+
+    <string name="no_account_hint">Don\'t have an account? Sign Up!</string>
+
+    <string name="register">Register</string>
+    <string name="login">Login</string>
+    <string name="logout">Logout</string>
+</resources>
