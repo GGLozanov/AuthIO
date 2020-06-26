@@ -9,11 +9,13 @@
     <string name="pref_username">com.example.preference_username</string>
     <string name="pref_description">com.example.preference_description</string>
 
+    <string name="email_hint">Enter e-mail</string>
     <string name="username_hint">Enter Username</string>
     <string name="password_hint">Enter Password</string>
     <string name="description_hint">Enter Description</string>
 
     <string name="no_account_hint">Don\'t have an account? Sign Up!</string>
+    <string name="have_account_hint">Have an account? Login!</string>
 
     <string name="register">Register</string>
     <string name="login">Login</string>
