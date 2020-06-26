@@ -42,7 +42,7 @@ public class PrefConfig {
     public void writeDescription(String description) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        editor.putString(context.getString(R.string.pref_username), description).apply();
+        editor.putString(context.getString(R.string.pref_description), description).apply();
     }
 
     public String readEmail() {
