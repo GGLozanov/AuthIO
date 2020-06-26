@@ -7,9 +7,10 @@
 
     <!-- TODO: Update blank fragment layout -->
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:layout_marginBottom="30dp"
         android:gravity="center"
         android:orientation="vertical">
 
@@ -42,6 +43,15 @@
             android:gravity="center"
             android:padding="15dp"
             android:text="@string/app_name" />
+
+        <Button
+            android:id="@+id/logout_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:background="@color/colorPrimaryDark"
+            android:drawableLeft="@drawable/ic_exit_to_app_black_24dp"
+            android:text="@string/logout" />
     </LinearLayout>
 
 </FrameLayout>

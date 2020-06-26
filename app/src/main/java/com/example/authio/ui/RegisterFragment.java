@@ -16,6 +16,7 @@ import com.example.authio.R;
 import com.example.authio.activities.MainActivity;
 import com.example.authio.api.APIOperations;
 import com.example.authio.api.NetworkModel;
+import com.example.authio.api.OnAuthStateChanged;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -26,10 +27,7 @@ import retrofit2.Response;
  */
 public class RegisterFragment extends AuthFragment {
 
-    public interface OnRegisterFormActivity {
-        void performRegister(String email, String username, String description);
-            // TODO: Redefinition of method; optimise to call only 1 method from MainActivity
-
+    public interface OnRegisterFormActivity extends OnAuthStateChanged {
         void performToggleToLogin();
     }
 
@@ -39,7 +37,6 @@ public class RegisterFragment extends AuthFragment {
     public RegisterFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -84,22 +81,33 @@ public class RegisterFragment extends AuthFragment {
             @Override
             public void onResponse(Call<NetworkModel> call, Response<NetworkModel> response) {
                 // handle application-level errors intended from HTTP response here...
+                if(response.isSuccessful()) {
+                    NetworkModel body = response.body();
+                    String responseCode = body.getResponse();
 
-                String responseCode = response.body().getResponse();
+                    if(responseCode.equals("ok")) {
+                        MainActivity.PREF_CONFIG.displayToast("Registration successful...");
 
-                if(responseCode.equals("ok")) {
-                    MainActivity.PREF_CONFIG.displayToast("Registration successful...");
-
-                    onRegisterFormActivity.performRegister(email, username, description);
-                    // TODO: Update fragment and replace with welcome fragment through interface
-                } else if(responseCode.equals("failed")) {
-                    MainActivity.PREF_CONFIG.displayToast("Registration unsuccessful...");
+                        onRegisterFormActivity.performAuthChange(
+                                body.getEmail(),
+                                body.getUsername(),
+                                body.getDescription()
+                        );
+                        // TODO: Update fragment and replace with welcome fragment through interface
+                    } else if(responseCode.equals("exists")) {
+                        MainActivity.PREF_CONFIG.displayToast("User already exists...");
+                    } else if(responseCode.equals("failed")) {
+                        MainActivity.PREF_CONFIG.displayToast("Registration unsuccessful...");
+                    }
+                } else {
+                    MainActivity.PREF_CONFIG.displayToast("Something went wrong...");
                 }
             }
 
             @Override
             public void onFailure(Call<NetworkModel> call, Throwable t) {
-                // handle failed HTTP response receiving due to server-side exception here...
+                // handle failed HTTP response receiving due to server-side exception here
+                MainActivity.PREF_CONFIG.displayToast(t.getMessage());
             }
         });
     }

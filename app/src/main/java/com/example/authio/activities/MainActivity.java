@@ -1,6 +1,7 @@
 package com.example.authio.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
 import android.os.Bundle;
@@ -43,50 +44,48 @@ public class MainActivity extends AppCompatActivity implements
                 // auth'd
                 fragmentManager
                         .beginTransaction()
-                        .add(R.id.fragment_container, new WelcomeFragment());
+                        .add(R.id.fragment_container, new WelcomeFragment()).commit();
                     // add the Welcome fragment to the container
             } else {
                 // not auth'd
                 fragmentManager
                         .beginTransaction()
-                        .add(R.id.fragment_container, new LoginFragment());
-                    // add the Login fragment to the container
+                        .add(R.id.fragment_container, new LoginFragment()).commit();
+                    // add the Login fragment to the container (always commit transactions)
             }
         }
     }
 
-    private void writeSharedPrefs(String email, String username, String description) {
-        PREF_CONFIG.writeEmail(email);
-        PREF_CONFIG.writeUsername(username);
-        PREF_CONFIG.writeDescription(description);
+    private void replaceCurrentFragment(Fragment fragmentReplacement) {
+        getSupportFragmentManager()
+                .beginTransaction()
+                .replace(R.id.fragment_container, fragmentReplacement).commitNow();
+    }
+
+
+    @Override
+    public void performAuthChange(String email, String username, String description) {
+        PREF_CONFIG.writeLoginStatus(true);
+        PREF_CONFIG.writeUserPrefs(email, username, description);
+
+        replaceCurrentFragment(new WelcomeFragment());
     }
 
     @Override
-    public void performLogin(String email, String username, String description) {
-        PREF_CONFIG.writeLoginStatus(true);
+    public void performAuthReset() {
+        PREF_CONFIG.writeLoginStatus(false);
+        PREF_CONFIG.resetUserPrefs();
 
-
+        replaceCurrentFragment(new LoginFragment());
     }
 
     @Override
     public void performToggleToRegister() {
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, new RegisterFragment());
-    }
-
-
-    @Override
-    public void performRegister(String email, String username, String description) {
-        // TODO: Implement with same func as performLogin
-        PREF_CONFIG.writeLoginStatus(true);
-
+        replaceCurrentFragment(new RegisterFragment());
     }
 
     @Override
     public void performToggleToLogin() {
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, new LoginFragment());
+        replaceCurrentFragment(new LoginFragment());
     }
 }

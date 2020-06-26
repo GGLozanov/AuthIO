@@ -23,7 +23,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginBottom="100dp"
+        android:layout_marginBottom="120dp"
         android:orientation="vertical"
         android:padding="15dp">
 
@@ -31,7 +31,7 @@
             android:id="@+id/email_input_field"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
+            android:layout_margin="10dp"
             android:ems="10"
             android:hint="@string/email_hint"
             android:inputType="textEmailAddress" />
@@ -40,7 +40,7 @@
             android:id="@+id/password_input_field"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
+            android:layout_margin="10dp"
             android:ems="10"
             android:hint="@string/password_hint"
             android:inputType="textPassword" />
@@ -49,7 +49,7 @@
             android:id="@+id/username_input_field"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
+            android:layout_margin="10dp"
             android:ems="10"
             android:hint="@string/username_hint"
             android:inputType="textPersonName" />
@@ -58,7 +58,7 @@
             android:id="@+id/description_input_field"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_margin="5dp"
+            android:layout_margin="10dp"
             android:ems="10"
             android:hint="@string/description_hint"
             android:inputType="textPersonName" />
@@ -70,7 +70,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center|center_horizontal"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="50dp"
         android:background="@color/colorPrimaryDark"
         android:drawableLeft="@drawable/ic_check_black_24dp"
         android:text="@string/register" />

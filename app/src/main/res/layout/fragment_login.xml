@@ -24,7 +24,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginBottom="100dp"
+        android:layout_marginBottom="160dp"
         android:orientation="vertical"
         android:padding="15dp">
 
@@ -35,7 +35,8 @@
             android:layout_margin="5dp"
             android:ems="10"
             android:hint="@string/email_hint"
-            android:inputType="textEmailAddress" />
+            android:inputType="textEmailAddress"
+            android:maxLines="4" />
 
         <EditText
             android:id="@+id/password_input_field"
@@ -44,7 +45,8 @@
             android:layout_margin="5dp"
             android:ems="10"
             android:hint="@string/password_hint"
-            android:inputType="textPassword" />
+            android:inputType="textPassword"
+            android:maxLines="2" />
 
     </LinearLayout>
 
@@ -53,9 +55,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center|center_horizontal"
+        android:layout_marginBottom="20dp"
         android:background="@color/colorPrimaryDark"
         android:drawableLeft="@drawable/ic_check_black_24dp"
-        android:text="@string/register" />
+        android:text="@string/login" />
 
     <TextView
         android:id="@+id/toggle_text"

@@ -16,6 +16,7 @@ import android.widget.EditText;
 import com.example.authio.R;
 import com.example.authio.activities.MainActivity;
 import com.example.authio.api.NetworkModel;
+import com.example.authio.api.OnAuthStateChanged;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -29,13 +30,9 @@ public class LoginFragment extends AuthFragment {
     // interface designed to communicate with MainActivity
     // through implementation in MainActivity and implicit cast
     // in onAttach() method here
-    public interface OnLoginFormActivity {
-        void performLogin(String email, String username, String description);
-            // arguments to be written into sharedprefs
-
+    public interface OnLoginFormActivity extends OnAuthStateChanged {
         void performToggleToRegister();
     }
-
 
     private OnLoginFormActivity onLoginFormActivity;
 
@@ -78,25 +75,35 @@ public class LoginFragment extends AuthFragment {
         authResult.enqueue(new Callback<NetworkModel>() {
             @Override
             public void onResponse(Call<NetworkModel> call, Response<NetworkModel> response) {
-                NetworkModel body = response.body();
-                String responseCode = body.getResponse();
+                if(response.isSuccessful()) {
+                    NetworkModel body = response.body();
+                    String responseCode = body.getResponse();
 
-                if(responseCode.equals("ok")) {
-                    MainActivity.PREF_CONFIG.writeLoginStatus(true); // set the status of logged in user to true
+                    if (responseCode.equals("ok")) {
+                        MainActivity.PREF_CONFIG.displayToast("Login successful...");
 
-                    onLoginFormActivity.performLogin(email, body.getUsername(), body.getDescription());
-                    // communicate w/ activity to update fragment through interface
-                } else if(responseCode.equals("failed")) {
-                    MainActivity.PREF_CONFIG.displayToast("Registration unsuccessful...");
+                        onLoginFormActivity.performAuthChange(
+                                body.getEmail(),
+                                body.getUsername(),
+                                body.getDescription()
+                        );
+                        // communicate w/ activity to update fragment through interface
+                    } else if (responseCode.equals("failed")) {
+                        MainActivity.PREF_CONFIG.displayToast("Login unsuccessful...");
+                    }
+                } else {
+                    MainActivity.PREF_CONFIG.displayToast("Something went wrong...");
                 }
             }
 
             @Override
             public void onFailure(Call<NetworkModel> call, Throwable t) {
-
+                // handle failed HTTP response receiving due to server-side exception here
+                MainActivity.PREF_CONFIG.displayToast(t.getMessage());
             }
         });
 
-
+        emailInput.setText("");
+        passwordInput.setText("");
     }
 }

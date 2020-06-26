@@ -28,6 +28,7 @@ public abstract class AuthFragment extends Fragment {
     protected void initAuthFields(View view) {
         emailInput = view.findViewById(R.id.email_input_field);
         passwordInput = view.findViewById(R.id.password_input_field);
+
         toggleText = view.findViewById(R.id.toggle_text);
         authButton = view.findViewById(R.id.auth_button);
     }

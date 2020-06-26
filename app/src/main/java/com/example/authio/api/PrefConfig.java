@@ -46,7 +46,7 @@ public class PrefConfig {
     }
 
     public String readEmail() {
-        return sharedPreferences.getString(context.getString(R.string.pref_email), "Description");
+        return sharedPreferences.getString(context.getString(R.string.pref_email), "Email");
     }
 
     public void writeEmail(String email) {
@@ -55,7 +55,19 @@ public class PrefConfig {
         editor.putString(context.getString(R.string.pref_email), email).apply();
     }
 
+    public void writeUserPrefs(String email, String username, String description) {
+        writeEmail(email);
+        writeUsername(username);
+        writeDescription(description);
+    }
+
+    public void resetUserPrefs() {
+        writeEmail(null);
+        writeUsername(null);
+        writeDescription(null);
+    }
+
     public void displayToast(String message) {
-        Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
+        Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }
 }
