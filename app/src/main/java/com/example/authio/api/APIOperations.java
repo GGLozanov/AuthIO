@@ -8,6 +8,7 @@ public interface APIOperations {
 
     @GET("register.php")
     Call<NetworkModel> performRegistration(
+            @Query("email") String email,
             @Query("username") String username,
             @Query("password") String password,
             @Query("description") String description
@@ -19,7 +20,7 @@ public interface APIOperations {
 
     @GET("login.php") // send a GET request to receive the result of this php script
     Call<NetworkModel> performLogin(
-            @Query("username") String username,
+            @Query("email") String email,
             @Query("password") String password
     );
 

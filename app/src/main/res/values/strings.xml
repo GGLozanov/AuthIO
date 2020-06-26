@@ -6,6 +6,7 @@
 
     <string name="pref_file">com.example.preference_file</string>
     <string name="pref_login_status">com.example.preference_login_status</string>
+    <string name="pref_email">com.example.preference_email</string>
     <string name="pref_username">com.example.preference_username</string>
     <string name="pref_description">com.example.preference_description</string>
 

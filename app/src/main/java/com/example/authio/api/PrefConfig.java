@@ -45,6 +45,16 @@ public class PrefConfig {
         editor.putString(context.getString(R.string.pref_username), description).apply();
     }
 
+    public String readEmail() {
+        return sharedPreferences.getString(context.getString(R.string.pref_email), "Description");
+    }
+
+    public void writeEmail(String email) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putString(context.getString(R.string.pref_email), email).apply();
+    }
+
     public void displayToast(String message) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show();
     }

@@ -14,10 +14,14 @@ public class NetworkModel {
     @SerializedName("username")
     private String username;
 
-
     @SerializedName("description")
     private String description;
 
+    public NetworkModel(String response, String username, String description) {
+        this.response = response;
+        this.username = username;
+        this.description = description;
+    }
 
     public String getResponse() {
         return response;

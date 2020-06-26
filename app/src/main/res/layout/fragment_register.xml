@@ -66,7 +66,7 @@
     </LinearLayout>
 
     <Button
-        android:id="@+id/register_button"
+        android:id="@+id/auth_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center|center_horizontal"
@@ -76,13 +76,13 @@
         android:text="@string/register" />
 
     <TextView
-        android:id="@+id/toggle_login_text"
+        android:id="@+id/toggle_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="120dp"
         android:gravity="center"
-        android:text="@string/no_account_hint"
+        android:text="@string/have_account_hint"
         android:textSize="18sp" />
 
 </FrameLayout>
