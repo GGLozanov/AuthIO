@@ -89,9 +89,9 @@ public class RegisterFragment extends AuthFragment {
                         MainActivity.PREF_CONFIG.displayToast("Registration successful...");
 
                         onRegisterFormActivity.performAuthChange(
-                                body.getEmail(),
-                                body.getUsername(),
-                                body.getDescription()
+                                email,
+                                username,
+                                description
                         );
                         // TODO: Update fragment and replace with welcome fragment through interface
                     } else if(responseCode.equals("exists")) {
