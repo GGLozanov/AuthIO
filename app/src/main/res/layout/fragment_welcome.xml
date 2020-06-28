@@ -11,8 +11,10 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginBottom="30dp"
+        android:background="@drawable/round_container"
         android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="10dp">
 
         <TextView
             android:id="@+id/username_text"
@@ -22,7 +24,9 @@
             android:layout_margin="10dp"
             android:gravity="center"
             android:padding="15dp"
-            android:text="@string/app_name" />
+            android:text="@string/app_name"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/description_text"
@@ -32,7 +36,9 @@
             android:layout_margin="10dp"
             android:gravity="center"
             android:padding="15dp"
-            android:text="@string/hello_blank_fragment" />
+            android:text="@string/hello_blank_fragment"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <TextView
             android:id="@+id/email_text"
@@ -42,16 +48,19 @@
             android:layout_margin="10dp"
             android:gravity="center"
             android:padding="15dp"
-            android:text="@string/app_name" />
+            android:text="@string/app_name"
+            android:textSize="18sp"
+            android:textStyle="bold" />
 
         <Button
             android:id="@+id/logout_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="20dp"
-            android:background="@color/colorPrimaryDark"
-            android:drawableLeft="@drawable/ic_exit_to_app_black_24dp"
-            android:text="@string/logout" />
+            android:background="@drawable/round_button"
+            android:drawableLeft="@drawable/ic_exit_to_app_white_24dp"
+            android:text="@string/logout"
+            android:textSize="18sp" />
     </LinearLayout>
 
 </FrameLayout>
