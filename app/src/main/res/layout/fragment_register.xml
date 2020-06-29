@@ -12,7 +12,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:layout_marginBottom="20dp"
         android:background="@drawable/round_container"
         android:orientation="vertical"
         android:padding="30dp">
@@ -30,6 +29,14 @@
             android:text="@string/register"
             android:textSize="30sp"
             android:textStyle="bold" />
+
+        <ImageView
+            android:id="@+id/profile_image"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:cropToPadding="true"
+            tools:src="@tools:sample/avatars" />
 
         <EditText
             android:id="@+id/email_input_field"

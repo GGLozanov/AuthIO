@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageView;
 
 import com.example.authio.R;
 import com.example.authio.activities.MainActivity;
@@ -25,13 +26,14 @@ import retrofit2.Response;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class RegisterFragment extends AuthFragment {
+public class RegisterFragment extends AuthFragment implements View.OnClickListener {
 
     public interface OnRegisterFormActivity extends OnAuthStateChanged {
         void performToggleToLogin();
     }
 
     private EditText usernameInput, descriptionInput;
+    private ImageView profileImage;
     private OnRegisterFormActivity onRegisterFormActivity;
 
     public RegisterFragment() {
@@ -50,10 +52,24 @@ public class RegisterFragment extends AuthFragment {
 
         usernameInput = view.findViewById(R.id.username_input_field);
         descriptionInput = view.findViewById(R.id.description_input_field);
+        profileImage = view.findViewById(R.id.profile_image);
 
         return view;
     }
 
+    // get image from upload here
+    // upload it to server by encoding it to base64
+    // add onClickListener for ImageView
+    // handle if image is never clicked (profile pic is never changed), then use default image in query and data
+    // download default image and put it into uploads
+
+
+    @Override
+    public void onClick(View v) {
+        if(v == profileImage) {
+            // handle onClick for profile image by rendering new intent w/ "image/*" and GET_CONTENT type
+        }
+    }
 
     @Override
     public void onAttach(Context context) {

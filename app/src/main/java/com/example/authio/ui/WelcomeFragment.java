@@ -11,6 +11,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.authio.R;
@@ -24,6 +25,7 @@ import com.example.authio.api.PrefConfig;
 public class WelcomeFragment extends Fragment {
 
     private TextView emailText, usernameText, descriptionText;
+    private ImageView profileImage;
     private Button logoutButton;
 
     private OnAuthStateChanged onAuthStateChanged; // listener for performing logout
@@ -32,6 +34,10 @@ public class WelcomeFragment extends Fragment {
         // Required empty public constructor
     }
 
+
+    // render image here on onAttach
+    // sql query with path to image (from sharedprefs?) on different thread
+    // render image with path from server
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -42,6 +48,8 @@ public class WelcomeFragment extends Fragment {
         emailText = view.findViewById(R.id.email_text);
         usernameText = view.findViewById(R.id.username_text);
         descriptionText = view.findViewById(R.id.description_text);
+
+        profileImage = view.findViewById(R.id.profile_image);
 
         setTextSources();
 
