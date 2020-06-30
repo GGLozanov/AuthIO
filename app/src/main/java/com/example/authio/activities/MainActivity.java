@@ -1,9 +1,11 @@
 package com.example.authio.activities;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.example.authio.R;
@@ -87,5 +89,10 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void performToggleToLogin() {
         replaceCurrentFragment(new LoginFragment());
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

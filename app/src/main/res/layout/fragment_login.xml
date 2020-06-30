@@ -30,9 +30,21 @@
             android:textSize="30sp"
             android:textStyle="bold" />
 
+        <TextView
+            android:id="@+id/error_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center"
+            android:text="@string/register"
+            android:textColor="#FF0000	"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:visibility="gone" />
+
         <EditText
             android:id="@+id/email_input_field"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_margin="5dp"
             android:ems="10"
@@ -59,6 +71,7 @@
             android:layout_marginBottom="20dp"
             android:background="@drawable/round_button"
             android:drawableLeft="@drawable/ic_check_white_24dp"
+            android:padding="10dp"
             android:text="@string/login"
             android:textSize="18sp" />
 
