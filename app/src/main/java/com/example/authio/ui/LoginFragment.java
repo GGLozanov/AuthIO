@@ -67,8 +67,7 @@ public class LoginFragment extends AuthFragment {
             showErrorMessage("Invalid info in forms!");
             return;
         }
-        hideErorrMessage();
-
+        hideErrorMessage();
 
         Call<UserModel> authResult = MainActivity
                 .API_OPERATIONS
@@ -88,6 +87,7 @@ public class LoginFragment extends AuthFragment {
                         MainActivity.PREF_CONFIG.displayToast("Login successful...");
 
                         onLoginFormActivity.performAuthChange(
+                                body.getId(),
                                 body.getEmail(),
                                 body.getUsername(),
                                 body.getDescription()

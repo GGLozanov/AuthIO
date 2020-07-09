@@ -6,6 +6,9 @@ import android.widget.Toast;
 
 import com.example.authio.R;
 
+// TODO: Tear down this config and make WelcomeFragment retrieve user with API call each time (important)
+// this cannot scale well so replace it
+
 public class PrefConfig {
     private SharedPreferences sharedPreferences;
     private Context context; // context used for sharedpreferences init and access operations for string resources
@@ -49,13 +52,25 @@ public class PrefConfig {
         return sharedPreferences.getString(context.getString(R.string.pref_email), "Email");
     }
 
+    public Integer readId() {
+        return sharedPreferences.getInt(context.getString(R.string.pref_id), 1);
+    }
+
+    public void writeId(Integer id) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putInt(context.getString(R.string.pref_id), id).apply();
+    }
+
+
     public void writeEmail(String email) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
         editor.putString(context.getString(R.string.pref_email), email).apply();
     }
 
-    public void writeUserPrefs(String email, String username, String description) {
+    public void writeUserPrefs(Integer id, String email, String username, String description) {
+        writeId(id);
         writeEmail(email);
         writeUsername(username);
         writeDescription(description);

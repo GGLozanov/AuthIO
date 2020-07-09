@@ -66,15 +66,19 @@ public class MainActivity extends AppCompatActivity implements
 
 
     @Override
-    public void performAuthChange(String email, String username, String description) {
+    public void performAuthChange(Integer id, String email, String username, String description) {
+        // TODO: Replace PREF_CONFIG for information and use API calls (keep for login status)
+
         PREF_CONFIG.writeLoginStatus(true);
-        PREF_CONFIG.writeUserPrefs(email, username, description);
+        PREF_CONFIG.writeUserPrefs(id, email, username, description);
 
         replaceCurrentFragment(new WelcomeFragment());
     }
 
     @Override
     public void performAuthReset() {
+        // TODO: Replace PREF_CONFIG for information and use API calls (keep for login status)
+
         PREF_CONFIG.writeLoginStatus(false);
         PREF_CONFIG.resetUserPrefs();
 

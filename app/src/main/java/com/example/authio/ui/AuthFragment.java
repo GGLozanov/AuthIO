@@ -46,7 +46,7 @@ public abstract class AuthFragment extends Fragment {
         errorText.setText(message);
     }
 
-    protected void hideErorrMessage() {
+    protected void hideErrorMessage() {
         errorText.setVisibility(View.GONE);
     }
 

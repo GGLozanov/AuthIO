@@ -7,7 +7,7 @@ public class ImageModel {
 
     @SerializedName("title")
     @Expose
-    private String title; // image title = user's username
+    private String title; // image title = user's id
 
     @SerializedName("image")
     @Expose

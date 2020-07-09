@@ -28,10 +28,10 @@ public interface APIOperations {
     );
 
 
-    @FormUrlEncoded
     @POST("image.php")
+    @FormUrlEncoded
     Call<ImageModel> performImageUpload(
-            @Field("title") String title,
+            @Field("title") String title, // title is user id (change to integer client and server side)
             @Field("image") String image
     );
 

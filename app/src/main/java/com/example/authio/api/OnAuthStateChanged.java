@@ -1,7 +1,7 @@
 package com.example.authio.api;
 
 public interface OnAuthStateChanged {
-    void performAuthChange(String email, String username, String description);
+    void performAuthChange(Integer id, String email, String username, String description);
 
     void performAuthReset();
 }

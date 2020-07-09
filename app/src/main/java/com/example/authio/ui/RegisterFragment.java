@@ -7,17 +7,14 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.ImageDecoder;
-import android.media.Image;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
-import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 import android.provider.MediaStore;
-import android.util.Base64;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -142,7 +139,7 @@ public class RegisterFragment extends AuthFragment {
             return;
         }
 
-        hideErorrMessage();
+        hideErrorMessage();
 
         // TODO: Hash password
         Call<UserModel> authResult = MainActivity
@@ -165,9 +162,12 @@ public class RegisterFragment extends AuthFragment {
                     if(responseCode.equals("ok")) {
                         MainActivity.PREF_CONFIG.displayToast("Registration successful...");
 
-                        uploadImage(); // go on to upload the image if the registration was successful
+                        Integer userId = body.getId();
+
+                        uploadImage(userId); // go on to upload the image if the registration was successful
 
                         onRegisterFormActivity.performAuthChange(
+                                userId,
                                 email,
                                 username,
                                 description
@@ -190,7 +190,7 @@ public class RegisterFragment extends AuthFragment {
         });
     }
 
-    private void uploadImage() {
+    private void uploadImage(Integer userId) {
 
         System.out.println(profileImage.getDrawable());
         System.out.println(ContextCompat.getDrawable(getContext(), R.drawable.default_img));
@@ -206,13 +206,12 @@ public class RegisterFragment extends AuthFragment {
                 .API_OPERATIONS
                 .performImageUpload(
                     image,
-                    usernameInput.getText().toString()
+                    userId.toString()
                 );
 
         imageUploadResult.enqueue(new Callback<ImageModel>() {
             @Override
             public void onResponse(Call<ImageModel> call, Response<ImageModel> response) {
-                System.out.println(response.code());
                 if(response.isSuccessful()) {
                     ImageModel body = response.body();
                     String responseCode = body.getResponse();

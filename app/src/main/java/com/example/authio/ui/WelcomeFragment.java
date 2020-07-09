@@ -4,10 +4,13 @@ package com.example.authio.ui;
 import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +23,7 @@ import com.example.authio.R;
 import com.example.authio.activities.MainActivity;
 import com.example.authio.api.APIClient;
 import com.example.authio.api.OnAuthStateChanged;
+import com.example.authio.utils.ImageDownloader;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -76,56 +80,17 @@ public class WelcomeFragment extends Fragment {
     }
 
     private void setTextSources() {
+        // TODO: Replace with API request if user is null or pass user from Login to fragment
         emailText.setText("E-mail: " + MainActivity.PREF_CONFIG.readEmail());
         usernameText.setText("Welcome, " + MainActivity.PREF_CONFIG.readUsername());
         descriptionText.setText(MainActivity.PREF_CONFIG.readDescription());
     }
 
-    private InputStream getURLContent(String urlString) {
-        URL url;
-
-        try {
-            url = new URL(urlString);
-        } catch (MalformedURLException e) {
-            Log.e("WelcomeFragment: ", e.toString());
-            return null;
-        }
-
-        AtomicReference<InputStream> content = new AtomicReference<>();
-
-        // TODO: Handle in different thread (Handler? AsyncTask?)
-        // start new thread to get the content's of the URL asynchronously
-        Thread networkThread = new Thread(() -> {
-            try {
-                content.set((InputStream) url.getContent()); // get image displayed
-            } catch (IOException e) {
-                Log.e("WelcomeFragment: ", e.toString());
-            }
-        });
-        networkThread.setPriority(Thread.MIN_PRIORITY);
-
-        networkThread.start();
-
-        try {
-            networkThread.join();
-        } catch (InterruptedException e) {
-            Log.e("WelcomeFragment: ", e.toString());
-        }
-
-        return content.get();
-    }
-
     private void setProfileImageSource() {
-        InputStream content = getURLContent(APIClient.getBaseURL() +
+
+        new ImageDownloader(profileImage).execute(APIClient.getBaseURL() +
                 "uploads/" +
                 MainActivity.PREF_CONFIG.readUsername() +
-                ".jpg");
-
-        if(content == null) {
-            return; // just stick with the default variable
-        }
-
-        Drawable drawable = Drawable.createFromStream(content , "src");
-        profileImage.setImageDrawable(drawable);
+                ".jpg"); // start AsyncTask to asynchronously download and render image upon completion
     }
 }
