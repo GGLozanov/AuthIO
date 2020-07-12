@@ -53,7 +53,7 @@ public class PrefConfig {
     }
 
     public Integer readId() {
-        return sharedPreferences.getInt(context.getString(R.string.pref_id), 1);
+        return sharedPreferences.getInt(context.getString(R.string.pref_id), 0);
     }
 
     public void writeId(Integer id) {

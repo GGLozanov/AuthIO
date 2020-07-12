@@ -13,6 +13,7 @@ public class APIClient {
         // change if hosted on a server or connection is changed
         // WAN IP allows connection from different networks (didn't work with LAN IP for other networks)
         // FireWall rules were also set up to allow connection from port 8080 (not default_img because it's disallowed from host ISP)
+
     private static Retrofit retrofit = null; // retrofit instance
 
     public static Retrofit getAPIClient() {

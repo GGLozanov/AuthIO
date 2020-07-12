@@ -29,6 +29,7 @@ import com.example.authio.api.UserModel;
 import com.example.authio.api.OnAuthStateChanged;
 import com.example.authio.utils.ImageUtils;
 import java.io.IOException;
+import java.util.concurrent.atomic.AtomicReference;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -167,10 +168,13 @@ public class RegisterFragment extends AuthFragment {
                         uploadImage(userId); // go on to upload the image if the registration was successful
 
                         onRegisterFormActivity.performAuthChange(
-                                userId,
-                                email,
-                                username,
-                                description
+                                new UserModel(
+                                        userId,
+                                        responseCode,
+                                        username,
+                                        description,
+                                        email
+                                )
                         ); // switch to welcome fragment after image is uploaded
                     } else if(responseCode.equals("exists")) {
                         MainActivity.PREF_CONFIG.displayToast("User already exists...");
@@ -191,10 +195,6 @@ public class RegisterFragment extends AuthFragment {
     }
 
     private void uploadImage(Integer userId) {
-
-        System.out.println(profileImage.getDrawable());
-        System.out.println(ContextCompat.getDrawable(getContext(), R.drawable.default_img));
-
         if(profileImage.getDrawable() ==
              ContextCompat.getDrawable(getContext(), R.drawable.default_img)) {
             return; // don't upload picture if it's the default
@@ -205,31 +205,44 @@ public class RegisterFragment extends AuthFragment {
         Call<ImageModel> imageUploadResult = MainActivity
                 .API_OPERATIONS
                 .performImageUpload(
-                    image,
-                    userId.toString()
+                    userId.toString(),
+                    image
                 );
 
-        imageUploadResult.enqueue(new Callback<ImageModel>() {
-            @Override
-            public void onResponse(Call<ImageModel> call, Response<ImageModel> response) {
-                if(response.isSuccessful()) {
-                    ImageModel body = response.body();
-                    String responseCode = body.getResponse();
+        AtomicReference<Response<ImageModel>> atomicResponse = new AtomicReference<>();
 
-                    if(responseCode.equals("Image Uploaded")) {
-                        MainActivity.PREF_CONFIG.displayToast("Image uploaded...");
-                    } else if(responseCode.equals("Image Upload Failed")) {
-                        MainActivity.PREF_CONFIG.displayToast("Image upload failed...");
-                    }
-                } else {
-                    MainActivity.PREF_CONFIG.displayToast("Something went wrong...");
-                }
-            }
-
-            @Override
-            public void onFailure(Call<ImageModel> call, Throwable t) {
-                MainActivity.PREF_CONFIG.displayToast(t.toString());
+        // TODO: Convert this to asynchronous execution and have AsyncTask in WelcomeFragment wait for this thread's execution (wait/notify)
+        Thread syncUploadThread = new Thread(() -> {
+            try {
+                atomicResponse.set(imageUploadResult.execute());
+            } catch (IOException e) {
+                Log.e("RegisterFragment Img", e.toString());
             }
         });
+
+        syncUploadThread.start();
+
+        try {
+            syncUploadThread.join();
+        } catch (InterruptedException e) {
+            Log.e("RegisterFragment Img", e.toString());
+        }
+        // execute upload synchronously for the user to have image immediately rendered upon login
+        // immediately join after start for synchronous execution
+
+        Response<ImageModel> response = atomicResponse.get();
+
+        if(response.isSuccessful()) {
+            ImageModel body = response.body();
+            String responseCode = body.getResponse();
+
+            if(responseCode.equals("Image Uploaded")) {
+                MainActivity.PREF_CONFIG.displayToast("Image uploaded...");
+            } else if(responseCode.equals("Image Upload Failed")) {
+                MainActivity.PREF_CONFIG.displayToast("Image upload failed...");
+            }
+        } else {
+            MainActivity.PREF_CONFIG.displayToast("Something went wrong...");
+        }
     }
 }

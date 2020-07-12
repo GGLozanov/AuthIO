@@ -87,10 +87,7 @@ public class LoginFragment extends AuthFragment {
                         MainActivity.PREF_CONFIG.displayToast("Login successful...");
 
                         onLoginFormActivity.performAuthChange(
-                                body.getId(),
-                                body.getEmail(),
-                                body.getUsername(),
-                                body.getDescription()
+                                body
                         );
                         // communicate w/ activity to update fragment through interface
                     } else if (responseCode.equals("failed")) {

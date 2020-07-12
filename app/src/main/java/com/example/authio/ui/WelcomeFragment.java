@@ -80,7 +80,7 @@ public class WelcomeFragment extends Fragment {
     }
 
     private void setTextSources() {
-        // TODO: Replace with API request if user is null or pass user from Login to fragment
+        // TODO: Replace with API call if user is null or pass user from Login to fragment
         emailText.setText("E-mail: " + MainActivity.PREF_CONFIG.readEmail());
         usernameText.setText("Welcome, " + MainActivity.PREF_CONFIG.readUsername());
         descriptionText.setText(MainActivity.PREF_CONFIG.readDescription());
@@ -90,7 +90,7 @@ public class WelcomeFragment extends Fragment {
 
         new ImageDownloader(profileImage).execute(APIClient.getBaseURL() +
                 "uploads/" +
-                MainActivity.PREF_CONFIG.readUsername() +
+                MainActivity.PREF_CONFIG.readId() + // TODO: Replace with user instance and API call
                 ".jpg"); // start AsyncTask to asynchronously download and render image upon completion
     }
 }

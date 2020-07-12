@@ -12,6 +12,7 @@ import com.example.authio.R;
 import com.example.authio.api.APIClient;
 import com.example.authio.api.APIOperations;
 import com.example.authio.api.PrefConfig;
+import com.example.authio.api.UserModel;
 import com.example.authio.ui.LoginFragment;
 import com.example.authio.ui.RegisterFragment;
 import com.example.authio.ui.WelcomeFragment;
@@ -40,19 +41,13 @@ public class MainActivity extends AppCompatActivity implements
                 return;
             }
 
-            FragmentManager fragmentManager = getSupportFragmentManager();
-
             if(PREF_CONFIG.readLoginStatus()) {
                 // auth'd
-                fragmentManager
-                        .beginTransaction()
-                        .add(R.id.fragment_container, new WelcomeFragment()).commit();
+                replaceCurrentFragment(new WelcomeFragment());
                     // add the Welcome fragment to the container
             } else {
                 // not auth'd
-                fragmentManager
-                        .beginTransaction()
-                        .add(R.id.fragment_container, new LoginFragment()).commit();
+                replaceCurrentFragment(new LoginFragment());
                     // add the Login fragment to the container (always commit transactions)
             }
         }
@@ -66,11 +61,11 @@ public class MainActivity extends AppCompatActivity implements
 
 
     @Override
-    public void performAuthChange(Integer id, String email, String username, String description) {
+    public void performAuthChange(UserModel user) {
         // TODO: Replace PREF_CONFIG for information and use API calls (keep for login status)
 
         PREF_CONFIG.writeLoginStatus(true);
-        PREF_CONFIG.writeUserPrefs(id, email, username, description);
+        PREF_CONFIG.writeUserPrefs(user.getId(), user.getEmail(), user.getUsername(), user.getDescription());
 
         replaceCurrentFragment(new WelcomeFragment());
     }

@@ -18,8 +18,8 @@ public class ImageUtils {
     public static String encodeImage(Bitmap bitmap) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         // stream of bytes to represent the bitmap with
-        bitmap.compress(Bitmap.CompressFormat.JPEG, Base64.DEFAULT, byteArrayOutputStream);
-        // compress bitmap to JPEG w/ default_img base64 quality and into ByteArrayOutputStream
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+        // compress bitmap to JPEG w/ best quality possible and pass it into the ByteArrayOutputStream
 
         byte[] imageByte = byteArrayOutputStream.toByteArray();
         return Base64.encodeToString(imageByte, Base64.DEFAULT);
