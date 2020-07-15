@@ -10,12 +10,10 @@ import androidx.fragment.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
 
 import com.example.authio.R;
 import com.example.authio.activities.MainActivity;
-import com.example.authio.api.NetworkModel;
+import com.example.authio.api.UserModel;
 import com.example.authio.api.OnAuthStateChanged;
 
 import retrofit2.Call;
@@ -65,27 +63,31 @@ public class LoginFragment extends AuthFragment {
         String email = emailInput.getText().toString(),
                 password = passwordInput.getText().toString();
 
-        Call<NetworkModel> authResult = MainActivity
+        if(email.isEmpty() || password.isEmpty()) {
+            showErrorMessage("Invalid info in forms!");
+            return;
+        }
+        hideErrorMessage();
+
+        Call<UserModel> authResult = MainActivity
                 .API_OPERATIONS
                 .performLogin(
                   email,
                   password
                 );
 
-        authResult.enqueue(new Callback<NetworkModel>() {
+        authResult.enqueue(new Callback<UserModel>() {
             @Override
-            public void onResponse(Call<NetworkModel> call, Response<NetworkModel> response) {
+            public void onResponse(Call<UserModel> call, Response<UserModel> response) {
                 if(response.isSuccessful()) {
-                    NetworkModel body = response.body();
+                    UserModel body = response.body();
                     String responseCode = body.getResponse();
 
                     if (responseCode.equals("ok")) {
                         MainActivity.PREF_CONFIG.displayToast("Login successful...");
 
                         onLoginFormActivity.performAuthChange(
-                                body.getEmail(),
-                                body.getUsername(),
-                                body.getDescription()
+                                body
                         );
                         // communicate w/ activity to update fragment through interface
                     } else if (responseCode.equals("failed")) {
@@ -97,7 +99,7 @@ public class LoginFragment extends AuthFragment {
             }
 
             @Override
-            public void onFailure(Call<NetworkModel> call, Throwable t) {
+            public void onFailure(Call<UserModel> call, Throwable t) {
                 // handle failed HTTP response receiving due to server-side exception here
                 MainActivity.PREF_CONFIG.displayToast(t.getMessage());
             }

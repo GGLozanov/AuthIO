@@ -5,7 +5,11 @@ import com.google.gson.annotations.SerializedName;
 
 // a transcribed model for an HTTP response from the Web service
 // contains 'response' (status), 'username', 'description', and 'email' at most in a JSON format
-public class NetworkModel {
+public class UserModel {
+
+    @SerializedName("id")
+    @Expose
+    private Integer id;
 
     @SerializedName("response") // indicates that the field should be serialized to JSON
     @Expose // indicates the field should be exposed for said JSON serialization
@@ -25,12 +29,15 @@ public class NetworkModel {
     @Expose
     private String email;
 
-    public NetworkModel(String response, String username, String description, String email) {
+    public UserModel(Integer id, String response, String username, String description, String email) {
+        this.id = id;
         this.response = response;
         this.username = username;
         this.description = description;
         this.email = email;
     }
+
+    public Integer getId() { return id; }
 
     public String getResponse() {
         return response;
