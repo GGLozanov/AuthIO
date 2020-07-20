@@ -157,17 +157,19 @@ public class RegisterFragment extends AuthFragment {
             @Override
             public void onResponse(Call<Token> call, Response<Token> response) {
                 // handle application-level errors intended from HTTP response here...
-                if(response.isSuccessful()) {
-                    Token body = response.body();
-                    String responseCode = body.getResponse();
+                Token token;
+
+                if(response.isSuccessful() && (token = response.body()) != null) {
+                    String responseCode = token.getResponse();
 
                     if(responseCode.equals("ok")) { // 3 ifs before a switch - words to live by!
                         // TODO: Get token here and call getUserInfo() here for next fragment
                         MainActivity.PREF_CONFIG.displayToast("Registration successful...");
 
-                        MainActivity.PREF_CONFIG.writeToken(body.getJWT()); // write & save token
+                        MainActivity.PREF_CONFIG.writeToken(token.getJWT()); // write & save token
+                        MainActivity.PREF_CONFIG.writeRefreshToken(token.getRefreshJWT()); // write & save refresh token
 
-                        Integer userId = body.getUserId();
+                        Integer userId = token.getUserId();
 
                         uploadImage(userId); // go on to upload the image if the registration was successful
 

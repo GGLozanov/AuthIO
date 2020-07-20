@@ -23,6 +23,7 @@ import com.example.authio.R;
 import com.example.authio.activities.MainActivity;
 import com.example.authio.api.APIClient;
 import com.example.authio.api.OnAuthStateChanged;
+import com.example.authio.models.Token;
 import com.example.authio.models.User;
 import com.example.authio.utils.ImageDownloader;
 
@@ -77,31 +78,12 @@ public class WelcomeFragment extends Fragment {
         logoutButton = view.findViewById(R.id.logout_button);
         logoutButton.setOnClickListener((v) -> onAuthStateChanged.performAuthReset());
 
+        // TODO: Extract into other class/function (this is why you have architecture! ViewModels...)
+
         if(user == null) {
-            Call<User> userFetchResult = MainActivity.API_OPERATIONS.getUser(
-                    MainActivity.PREF_CONFIG.readToken()
-            );
-
-            userFetchResult.enqueue(new Callback<User>() {
-                @Override
-                public void onResponse(Call<User> call, Response<User> response) {
-                    // TODO: Handle refresh token saving and reissuing request here
-                    if(response.isSuccessful() && (user = response.body()) != null) {
-                        setProfileImageSource();
-                        setTextSources();
-                    } else {
-                        MainActivity.PREF_CONFIG.displayToast("Something went wrong. " + response.code());
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<User> call, Throwable t) {
-                    MainActivity.PREF_CONFIG.displayToast("Oops! " + t.getMessage());
-                    onAuthStateChanged.performAuthReset(); // logout upon failure
-                }
-            });
+            fetchUser();
         } else {
-            // need to call here again because of potential fallthrough from background thread
+            // need to call here again & in else because of potential fallthrough from background thread
             setProfileImageSource();
             setTextSources();
         }
@@ -124,12 +106,104 @@ public class WelcomeFragment extends Fragment {
     }
 
     private void setProfileImageSource() {
-
-        // async login => logout if it fails
-
         new ImageDownloader(profileImage).execute(APIClient.getBaseURL() +
                 "uploads/" +
                 user.getId() + // TODO: Replace with user instance and API call
                 ".jpg"); // start AsyncTask to asynchronously download and render image upon completion
+    }
+
+    private void fetchUser() {
+        // TODO: Optimise this abomination and shorten w/ error handling functions
+
+        Call<User> userFetchResult = MainActivity.API_OPERATIONS.getUser(
+                MainActivity.PREF_CONFIG.readToken()
+        );
+
+        userFetchResult.enqueue(new Callback<User>() {
+            @Override
+            public void onResponse(Call<User> call, Response<User> response) {
+
+                if((user = response.body()) == null) {
+                    // TODO: Extract in function (w/ reauth call)
+                    displayErrorAndReauth("Something went wrong. " + response.code());
+                }
+
+                String responseCode = user.getResponse();
+
+                if(response.isSuccessful() && responseCode.equals("ok")) {
+                    setProfileImageSource();
+                    setTextSources();
+
+                } else if(responseCode.equals("Expired token. Get refresh token.")) {
+                    Call<Token> tokenResult = MainActivity.API_OPERATIONS.refreshToken(
+                            MainActivity.PREF_CONFIG.readRefreshToken()
+                    ); // fetch new token from refresh token
+
+                    tokenResult.enqueue(new Callback<Token>() {
+                        @Override
+                        public void onResponse(Call<Token> call, Response<Token> response) {
+                            Token token;
+                            if(response.isSuccessful() &&
+                                    (token = response.body()) != null) {
+                                String responseCode = token.getResponse();
+
+                                if(responseCode.equals("ok")) {
+                                    String jwtToken = token.getJWT();
+
+                                    MainActivity.PREF_CONFIG.writeToken(jwtToken); // refresh jwt is null here! (request doesn't contain it)
+
+                                    Call<User> userFetchResult = MainActivity.API_OPERATIONS.getUser(
+                                            jwtToken
+                                    );
+
+                                    userFetchResult.enqueue(new Callback<User>() {
+                                        @Override
+                                        public void onResponse(Call<User> call, Response<User> response) {
+                                            if((user = response.body()) == null) {
+                                                // TODO: Extract in function (w/ reauth call)
+                                                displayErrorAndReauth("Could not refetch user! " + response.code());
+                                            }
+
+                                            String responseCode = user.getResponse();
+
+                                            if(response.isSuccessful() && responseCode.equals("ok")) {
+                                                setProfileImageSource();
+                                                setTextSources();
+                                            } else {
+                                                displayErrorAndReauth("Request failed! " + response.code());
+                                            }
+                                        }
+
+                                        @Override
+                                        public void onFailure(Call<User> call, Throwable t) {
+                                            displayErrorAndReauth("Could not refetch user! " + response.code());
+                                        }
+                                    });
+                                }
+                            } else {
+                                displayErrorAndReauth("Couldn't get new token! " + response.code());
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Token> call, Throwable t) {
+                            displayErrorAndReauth("Couldn't get new token! " + response.code());
+                        }
+                    });
+                } else {
+                    displayErrorAndReauth("Invalid token! " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<User> call, Throwable t) {
+                displayErrorAndReauth("Oops! " + t.getMessage());
+            }
+        });
+    }
+
+    private void displayErrorAndReauth(String error) {
+        MainActivity.PREF_CONFIG.displayToast(error);
+        onAuthStateChanged.performAuthReset(); // logout upon failure
     }
 }

@@ -33,6 +33,10 @@ public interface APIOperations {
             @Query("password") String password
     );
 
+    @GET("api/auth/refresh_token.php")
+    Call<Token> refreshToken(
+            @Field("refresh_jwt") String refreshJWT
+    );
 
     @GET("api/service/user_info.php")
     Call<User> getUser(

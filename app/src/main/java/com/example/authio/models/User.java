@@ -4,7 +4,7 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 // a transcribed model for an HTTP response from the Web service
-// contains 'response' (status), 'username', 'description', and 'email' at most in a JSON format
+// contains 'response' (status), 'username', 'description', and 'email' (at most) in a JSON format
 public class User {
 
     @SerializedName("id")
@@ -22,7 +22,6 @@ public class User {
     @SerializedName("email")
     @Expose
     private String email;
-
 
     @SerializedName("response") // indicates that the field should be serialized to JSON
     @Expose // indicates the field should be exposed for said JSON serialization

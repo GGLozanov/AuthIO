@@ -38,6 +38,16 @@ public class PrefConfig {
         return sharedPreferences.getString(context.getString(R.string.pref_token), "invalid");
     }
 
+    public void writeRefreshToken(String refreshToken) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+
+        editor.putString(context.getString(R.string.pref_refresh_token), refreshToken).apply();
+    }
+
+    public String readRefreshToken() {
+        return sharedPreferences.getString(context.getString(R.string.pref_refresh_token), "invalid");
+    }
+
     public void displayToast(String message) {
         Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }

@@ -89,6 +89,7 @@ public class LoginFragment extends AuthFragment {
                         MainActivity.PREF_CONFIG.displayToast("Login successful...");
 
                         MainActivity.PREF_CONFIG.writeToken(token.getJWT());
+                        MainActivity.PREF_CONFIG.writeRefreshToken(token.getRefreshJWT());
 
                         onLoginFormActivity.performAuthChange(
                                 null // pass in empty user and get in WelcomeFragment
