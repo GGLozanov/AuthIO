@@ -1,36 +1,48 @@
 package com.example.authio.api;
 
+import com.example.authio.models.Image;
+import com.example.authio.models.Token;
+import com.example.authio.models.User;
+
 import retrofit2.Call;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
+import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 public interface APIOperations {
 
-    @GET("register.php")
-    Call<UserModel> performRegistration(
-            @Query("email") String email,
-            @Query("username") String username,
-            @Query("password") String password,
-            @Query("description") String description
-    );
+    @POST("api/auth/register.php")
+    Call<Token> performRegistration(
+            @Field("email") String email,
+            @Field("username") String username,
+            @Field("password") String password,
+            @Field("description") String description
+    ); // returns jwt on successful register
 
     // Call is provided by Retrofit as a Java class for a direct HTTP response
     // (w/ generic type of our custom model)
     // Query annotation receives the value of the query parameter at the given script's URL
 
-    @GET("login.php") // send a GET request to receive the result of this php script
-    Call<UserModel> performLogin(
+    // TODO: Change call to return token
+    @GET("api/auth/login.php") // send a GET request to receive the result of this php script
+    Call<Token> performLogin(
             @Query("email") String email,
             @Query("password") String password
     );
 
 
-    @POST("image.php")
+    @GET("api/service/user_info.php")
+    Call<User> getUser(
+            @Header("Authorization") String token // username inside token for DB query; token inside auth header
+    );
+
+
+    @POST("api/service/image.php")
     @FormUrlEncoded
-    Call<ImageModel> performImageUpload(
+    Call<Image> performImageUpload(
             @Field("title") String title, // title is user id (change to integer client and server side)
             @Field("image") String image
     );

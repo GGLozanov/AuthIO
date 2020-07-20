@@ -13,7 +13,8 @@ import android.view.ViewGroup;
 
 import com.example.authio.R;
 import com.example.authio.activities.MainActivity;
-import com.example.authio.api.UserModel;
+import com.example.authio.models.Token;
+import com.example.authio.models.User;
 import com.example.authio.api.OnAuthStateChanged;
 
 import retrofit2.Call;
@@ -69,21 +70,22 @@ public class LoginFragment extends AuthFragment {
         }
         hideErrorMessage();
 
-        Call<UserModel> authResult = MainActivity
+        Call<Token> authResult = MainActivity
                 .API_OPERATIONS
                 .performLogin(
                   email,
                   password
                 );
 
-        authResult.enqueue(new Callback<UserModel>() {
+        authResult.enqueue(new Callback<Token>() {
             @Override
-            public void onResponse(Call<UserModel> call, Response<UserModel> response) {
+            public void onResponse(Call<Token> call, Response<Token> response) {
                 if(response.isSuccessful()) {
-                    UserModel body = response.body();
+                    Token body = response.body();
                     String responseCode = body.getResponse();
 
                     if (responseCode.equals("ok")) {
+                        // TODO: Get token here and call getUserInfo() here for next fragment
                         MainActivity.PREF_CONFIG.displayToast("Login successful...");
 
                         onLoginFormActivity.performAuthChange(
@@ -99,7 +101,7 @@ public class LoginFragment extends AuthFragment {
             }
 
             @Override
-            public void onFailure(Call<UserModel> call, Throwable t) {
+            public void onFailure(Call<Token> call, Throwable t) {
                 // handle failed HTTP response receiving due to server-side exception here
                 MainActivity.PREF_CONFIG.displayToast(t.getMessage());
             }

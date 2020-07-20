@@ -24,8 +24,9 @@ import android.widget.ImageView;
 
 import com.example.authio.R;
 import com.example.authio.activities.MainActivity;
-import com.example.authio.api.ImageModel;
-import com.example.authio.api.UserModel;
+import com.example.authio.models.Image;
+import com.example.authio.models.Token;
+import com.example.authio.models.User;
 import com.example.authio.api.OnAuthStateChanged;
 import com.example.authio.utils.ImageUtils;
 import java.io.IOException;
@@ -143,7 +144,7 @@ public class RegisterFragment extends AuthFragment {
         hideErrorMessage();
 
         // TODO: Hash password
-        Call<UserModel> authResult = MainActivity
+        Call<Token> authResult = MainActivity
                 .API_OPERATIONS
                 .performRegistration(
                         email,
@@ -152,15 +153,16 @@ public class RegisterFragment extends AuthFragment {
                         description
                 );
 
-        authResult.enqueue(new Callback<UserModel>() {
+        authResult.enqueue(new Callback<Token>() {
             @Override
-            public void onResponse(Call<UserModel> call, Response<UserModel> response) {
+            public void onResponse(Call<Token> call, Response<Token> response) {
                 // handle application-level errors intended from HTTP response here...
                 if(response.isSuccessful()) {
-                    UserModel body = response.body();
+                    Token body = response.body();
                     String responseCode = body.getResponse();
 
                     if(responseCode.equals("ok")) {
+                        // TODO: Get token here and call getUserInfo() here for next fragment
                         MainActivity.PREF_CONFIG.displayToast("Registration successful...");
 
                         Integer userId = body.getId();
@@ -168,7 +170,7 @@ public class RegisterFragment extends AuthFragment {
                         uploadImage(userId); // go on to upload the image if the registration was successful
 
                         onRegisterFormActivity.performAuthChange(
-                                new UserModel(
+                                new User(
                                         userId,
                                         responseCode,
                                         username,
@@ -187,7 +189,7 @@ public class RegisterFragment extends AuthFragment {
             }
 
             @Override
-            public void onFailure(Call<UserModel> call, Throwable t) {
+            public void onFailure(Call<Token> call, Throwable t) {
                 // handle failed HTTP response receiving due to server-side exception here
                 MainActivity.PREF_CONFIG.displayToast(t.getMessage());
             }
@@ -202,14 +204,14 @@ public class RegisterFragment extends AuthFragment {
 
         String image = ImageUtils.encodeImage(bitmap);
 
-        Call<ImageModel> imageUploadResult = MainActivity
+        Call<Image> imageUploadResult = MainActivity
                 .API_OPERATIONS
                 .performImageUpload(
                     userId.toString(),
                     image
                 );
 
-        AtomicReference<Response<ImageModel>> atomicResponse = new AtomicReference<>();
+        AtomicReference<Response<Image>> atomicResponse = new AtomicReference<>();
 
         // TODO: Convert this to asynchronous execution and have AsyncTask in WelcomeFragment wait for this thread's execution (wait/notify)
         Thread syncUploadThread = new Thread(() -> {
@@ -230,10 +232,10 @@ public class RegisterFragment extends AuthFragment {
         // execute upload synchronously for the user to have image immediately rendered upon login
         // immediately join after start for synchronous execution
 
-        Response<ImageModel> response = atomicResponse.get();
+        Response<Image> response = atomicResponse.get();
 
         if(response.isSuccessful()) {
-            ImageModel body = response.body();
+            Image body = response.body();
             String responseCode = body.getResponse();
 
             if(responseCode.equals("Image Uploaded")) {

@@ -3,7 +3,6 @@ package com.example.authio.activities;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
-import androidx.fragment.app.FragmentManager;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -12,7 +11,7 @@ import com.example.authio.R;
 import com.example.authio.api.APIClient;
 import com.example.authio.api.APIOperations;
 import com.example.authio.api.PrefConfig;
-import com.example.authio.api.UserModel;
+import com.example.authio.models.User;
 import com.example.authio.ui.LoginFragment;
 import com.example.authio.ui.RegisterFragment;
 import com.example.authio.ui.WelcomeFragment;
@@ -61,7 +60,7 @@ public class MainActivity extends AppCompatActivity implements
 
 
     @Override
-    public void performAuthChange(UserModel user) {
+    public void performAuthChange(User user) {
         // TODO: Replace PREF_CONFIG for information and use API calls (keep for login status)
 
         PREF_CONFIG.writeLoginStatus(true);
