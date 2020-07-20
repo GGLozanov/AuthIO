@@ -15,6 +15,7 @@ import retrofit2.http.Query;
 public interface APIOperations {
 
     @POST("api/auth/register.php")
+    @FormUrlEncoded
     Call<Token> performRegistration(
             @Field("email") String email,
             @Field("username") String username,
@@ -34,6 +35,7 @@ public interface APIOperations {
     );
 
     @GET("api/auth/refresh_token.php")
+    @FormUrlEncoded
     Call<Token> refreshToken(
             @Field("refresh_jwt") String refreshJWT
     );

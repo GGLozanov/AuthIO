@@ -148,8 +148,8 @@ public class RegisterFragment extends AuthFragment {
                 .API_OPERATIONS
                 .performRegistration(
                         email,
-                        password,
                         username,
+                        password,
                         description
                 );
 
@@ -171,24 +171,21 @@ public class RegisterFragment extends AuthFragment {
 
                         Integer userId = token.getUserId();
 
-                        uploadImage(userId); // go on to upload the image if the registration was successful
+                        uploadImageAndAuth(new User(
+                                userId,
+                                responseCode,
+                                username,
+                                description,
+                                email
+                        )); // go on to upload the image if the registration was successful
 
-                        onRegisterFormActivity.performAuthChange(
-                                new User(
-                                        userId,
-                                        responseCode,
-                                        username,
-                                        description,
-                                        email
-                                )
-                        ); // switch to welcome fragment after image is uploaded
                     } else if(responseCode.equals("exists")) {
                         MainActivity.PREF_CONFIG.displayToast("User already exists...");
                     } else if(responseCode.equals("failed")) {
                         MainActivity.PREF_CONFIG.displayToast("Registration unsuccessful...");
                     }
                 } else {
-                    MainActivity.PREF_CONFIG.displayToast("Something went wrong...");
+                    MainActivity.PREF_CONFIG.displayToast("Register: Something went wrong..." + response.code());
                 }
             }
 
@@ -200,7 +197,7 @@ public class RegisterFragment extends AuthFragment {
         });
     }
 
-    private void uploadImage(Integer userId) {
+    private void uploadImageAndAuth(User user) {
         if(profileImage.getDrawable() ==
              ContextCompat.getDrawable(getContext(), R.drawable.default_img)) {
             return; // don't upload picture if it's the default
@@ -211,44 +208,41 @@ public class RegisterFragment extends AuthFragment {
         Call<Image> imageUploadResult = MainActivity
                 .API_OPERATIONS
                 .performImageUpload(
-                    userId.toString(),
+                    user.getId().toString(),
                     image
                 );
 
-        AtomicReference<Response<Image>> atomicResponse = new AtomicReference<>();
 
-        // TODO: Convert this to asynchronous execution and have AsyncTask in WelcomeFragment wait for this thread's execution (wait/notify)
-        Thread syncUploadThread = new Thread(() -> {
-            try {
-                atomicResponse.set(imageUploadResult.execute());
-            } catch (IOException e) {
-                Log.e("RegisterFragment Img", e.toString());
+        imageUploadResult.enqueue(new Callback<Image>() {
+            @Override
+            public void onResponse(Call<Image> call, Response<Image> response) {
+                Image image;
+                if(response.isSuccessful() && (image = response.body()) != null) {
+                    String responseCode = image.getResponse();
+
+                    if(responseCode.equals("Image Uploaded")) {
+                        MainActivity.PREF_CONFIG.displayToast("Image uploaded...");
+                    } else if(responseCode.equals("Image Upload Failed")) {
+                        MainActivity.PREF_CONFIG.displayToast("Image upload failed...");
+                    }
+
+                    onRegisterFormActivity.performAuthChange(
+                            user
+                    ); // switch to welcome fragment after image is uploaded
+                } else {
+                    MainActivity.PREF_CONFIG.displayToast("Image: Something went wrong... " + response.code());
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Image> call, Throwable t) {
+                MainActivity.PREF_CONFIG.displayToast("Something went wrong " + t.toString());
             }
         });
 
-        syncUploadThread.start();
-
-        try {
-            syncUploadThread.join();
-        } catch (InterruptedException e) {
-            Log.e("RegisterFragment Img", e.toString());
-        }
+        // TODO: Convert this to asynchronous execution and have AsyncTask in WelcomeFragment wait for this thread's execution (wait/notify)
         // execute upload synchronously for the user to have image immediately rendered upon login
         // immediately join after start for synchronous execution
 
-        Response<Image> response = atomicResponse.get();
-
-        Image body;
-        if(response.isSuccessful() && (body = response.body()) != null) {
-            String responseCode = body.getResponse();
-
-            if(responseCode.equals("Image Uploaded")) {
-                MainActivity.PREF_CONFIG.displayToast("Image uploaded...");
-            } else if(responseCode.equals("Image Upload Failed")) {
-                MainActivity.PREF_CONFIG.displayToast("Image upload failed...");
-            }
-        } else {
-            MainActivity.PREF_CONFIG.displayToast("Something went wrong...");
-        }
     }
 }
