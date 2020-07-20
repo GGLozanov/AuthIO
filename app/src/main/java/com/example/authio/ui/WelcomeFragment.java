@@ -23,6 +23,7 @@ import com.example.authio.R;
 import com.example.authio.activities.MainActivity;
 import com.example.authio.api.APIClient;
 import com.example.authio.api.OnAuthStateChanged;
+import com.example.authio.models.User;
 import com.example.authio.utils.ImageDownloader;
 
 import java.io.IOException;
@@ -30,6 +31,10 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.concurrent.atomic.AtomicReference;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -41,6 +46,12 @@ public class WelcomeFragment extends Fragment {
     private Button logoutButton;
 
     private OnAuthStateChanged onAuthStateChanged; // listener for performing logout
+
+    private User user; // current fetched user
+
+    public WelcomeFragment(User user) {
+        this.user = user;
+    }
 
     public WelcomeFragment() {
         // Required empty public constructor
@@ -63,11 +74,37 @@ public class WelcomeFragment extends Fragment {
 
         profileImage = view.findViewById(R.id.profile_image);
 
-        setProfileImageSource();
-        setTextSources();
-
         logoutButton = view.findViewById(R.id.logout_button);
         logoutButton.setOnClickListener((v) -> onAuthStateChanged.performAuthReset());
+
+        if(user == null) {
+            Call<User> userFetchResult = MainActivity.API_OPERATIONS.getUser(
+                    MainActivity.PREF_CONFIG.readToken()
+            );
+
+            userFetchResult.enqueue(new Callback<User>() {
+                @Override
+                public void onResponse(Call<User> call, Response<User> response) {
+                    // TODO: Handle refresh token saving and reissuing request here
+                    if(response.isSuccessful() && (user = response.body()) != null) {
+                        setProfileImageSource();
+                        setTextSources();
+                    } else {
+                        MainActivity.PREF_CONFIG.displayToast("Something went wrong. " + response.code());
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<User> call, Throwable t) {
+                    MainActivity.PREF_CONFIG.displayToast("Oops! " + t.getMessage());
+                    onAuthStateChanged.performAuthReset(); // logout upon failure
+                }
+            });
+        } else {
+            // need to call here again because of potential fallthrough from background thread
+            setProfileImageSource();
+            setTextSources();
+        }
 
         return view;
     }
@@ -81,16 +118,18 @@ public class WelcomeFragment extends Fragment {
 
     private void setTextSources() {
         // TODO: Replace with API call if user is null or pass user from Login to fragment
-        emailText.setText("E-mail: " + MainActivity.PREF_CONFIG.readEmail());
-        usernameText.setText("Welcome, " + MainActivity.PREF_CONFIG.readUsername());
-        descriptionText.setText(MainActivity.PREF_CONFIG.readDescription());
+        emailText.setText("E-mail: " + user.getEmail());
+        usernameText.setText("Welcome, " + user.getUsername());
+        descriptionText.setText(user.getDescription());
     }
 
     private void setProfileImageSource() {
 
+        // async login => logout if it fails
+
         new ImageDownloader(profileImage).execute(APIClient.getBaseURL() +
                 "uploads/" +
-                MainActivity.PREF_CONFIG.readId() + // TODO: Replace with user instance and API call
+                user.getId() + // TODO: Replace with user instance and API call
                 ".jpg"); // start AsyncTask to asynchronously download and render image upon completion
     }
 }

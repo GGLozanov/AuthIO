@@ -13,11 +13,19 @@ public class Token {
     @Expose
     String response;
 
+    @SerializedName("userId")
+    @Expose
+    Integer userId; // may be null
+
     public String getJWT() {
         return jwt;
     }
 
     public String getResponse() {
         return response;
+    }
+
+    public Integer getUserId() {
+        return userId;
     }
 }

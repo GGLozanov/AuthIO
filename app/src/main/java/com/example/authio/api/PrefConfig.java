@@ -28,58 +28,14 @@ public class PrefConfig {
         editor.putBoolean(context.getString(R.string.pref_login_status), status).apply();
     }
 
-    public String readUsername() {
-        return sharedPreferences.getString(context.getString(R.string.pref_username), "User");
-    }
-
-    public void writeUsername(String username) {
+    public void writeToken(String token) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        editor.putString(context.getString(R.string.pref_username), username).apply();
+        editor.putString(context.getString(R.string.pref_token), token).apply();
     }
 
-    public String readDescription() {
-        return sharedPreferences.getString(context.getString(R.string.pref_description), "Description");
-    }
-
-    public void writeDescription(String description) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        editor.putString(context.getString(R.string.pref_description), description).apply();
-    }
-
-    public String readEmail() {
-        return sharedPreferences.getString(context.getString(R.string.pref_email), "Email");
-    }
-
-    public Integer readId() {
-        return sharedPreferences.getInt(context.getString(R.string.pref_id), 0);
-    }
-
-    public void writeId(Integer id) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        editor.putInt(context.getString(R.string.pref_id), id).apply();
-    }
-
-
-    public void writeEmail(String email) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        editor.putString(context.getString(R.string.pref_email), email).apply();
-    }
-
-    public void writeUserPrefs(Integer id, String email, String username, String description) {
-        writeId(id);
-        writeEmail(email);
-        writeUsername(username);
-        writeDescription(description);
-    }
-
-    public void resetUserPrefs() {
-        writeEmail(null);
-        writeUsername(null);
-        writeDescription(null);
+    public String readToken() {
+        return sharedPreferences.getString(context.getString(R.string.pref_token), "invalid");
     }
 
     public void displayToast(String message) {

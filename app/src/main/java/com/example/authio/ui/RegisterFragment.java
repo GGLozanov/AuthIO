@@ -161,11 +161,13 @@ public class RegisterFragment extends AuthFragment {
                     Token body = response.body();
                     String responseCode = body.getResponse();
 
-                    if(responseCode.equals("ok")) {
+                    if(responseCode.equals("ok")) { // 3 ifs before a switch - words to live by!
                         // TODO: Get token here and call getUserInfo() here for next fragment
                         MainActivity.PREF_CONFIG.displayToast("Registration successful...");
 
-                        Integer userId = body.getId();
+                        MainActivity.PREF_CONFIG.writeToken(body.getJWT()); // write & save token
+
+                        Integer userId = body.getUserId();
 
                         uploadImage(userId); // go on to upload the image if the registration was successful
 
@@ -234,8 +236,8 @@ public class RegisterFragment extends AuthFragment {
 
         Response<Image> response = atomicResponse.get();
 
-        if(response.isSuccessful()) {
-            Image body = response.body();
+        Image body;
+        if(response.isSuccessful() && (body = response.body()) != null) {
             String responseCode = body.getResponse();
 
             if(responseCode.equals("Image Uploaded")) {

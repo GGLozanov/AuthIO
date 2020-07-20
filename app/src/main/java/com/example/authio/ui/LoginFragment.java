@@ -80,18 +80,19 @@ public class LoginFragment extends AuthFragment {
         authResult.enqueue(new Callback<Token>() {
             @Override
             public void onResponse(Call<Token> call, Response<Token> response) {
-                if(response.isSuccessful()) {
-                    Token body = response.body();
-                    String responseCode = body.getResponse();
+                Token token;
+                if(response.isSuccessful() && (token = response.body()) != null) {
+                    String responseCode = token.getResponse();
 
                     if (responseCode.equals("ok")) {
                         // TODO: Get token here and call getUserInfo() here for next fragment
                         MainActivity.PREF_CONFIG.displayToast("Login successful...");
 
+                        MainActivity.PREF_CONFIG.writeToken(token.getJWT());
+
                         onLoginFormActivity.performAuthChange(
-                                body
-                        );
-                        // communicate w/ activity to update fragment through interface
+                                null // pass in empty user and get in WelcomeFragment
+                        ); // communicate w/ activity to update fragment through interface
                     } else if (responseCode.equals("failed")) {
                         MainActivity.PREF_CONFIG.displayToast("Login unsuccessful...");
                     }
