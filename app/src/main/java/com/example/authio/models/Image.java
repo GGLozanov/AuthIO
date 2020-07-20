@@ -1,9 +1,9 @@
-package com.example.authio.api;
+package com.example.authio.models;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class ImageModel {
+public class Image {
 
     @SerializedName("title")
     @Expose
