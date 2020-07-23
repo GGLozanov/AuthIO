@@ -29,8 +29,11 @@ import com.example.authio.models.Token;
 import com.example.authio.models.User;
 import com.example.authio.api.OnAuthStateChanged;
 import com.example.authio.utils.ImageUtils;
+import com.example.authio.utils.NetworkUtils;
+
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicReference;
+
+import org.json.JSONException;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -136,14 +139,12 @@ public class RegisterFragment extends AuthFragment {
                 description = descriptionInput.getText().toString();
 
         if(email.isEmpty() || password.isEmpty() || username.isEmpty() || description.isEmpty()) {
-            // TODO: add error message to be displayed
             showErrorMessage("Invalid info in fields!");
             return;
         }
 
         hideErrorMessage();
 
-        // TODO: Hash password
         Call<Token> authResult = MainActivity
                 .API_OPERATIONS
                 .performRegistration(
@@ -162,10 +163,7 @@ public class RegisterFragment extends AuthFragment {
                 if(response.isSuccessful() && (token = response.body()) != null) {
                     String responseCode = token.getResponse();
 
-                    if(responseCode.equals("ok")) { // 3 ifs before a switch - words to live by!
-                        // TODO: Get token here and call getUserInfo() here for next fragment
-                        MainActivity.PREF_CONFIG.displayToast("Registration successful...");
-
+                    if(responseCode.equals("ok")) {
                         MainActivity.PREF_CONFIG.writeToken(token.getJWT()); // write & save token
                         MainActivity.PREF_CONFIG.writeRefreshToken(token.getRefreshJWT()); // write & save refresh token
 
@@ -179,13 +177,23 @@ public class RegisterFragment extends AuthFragment {
                                 email
                         )); // go on to upload the image if the registration was successful
 
-                    } else if(responseCode.equals("exists")) {
-                        MainActivity.PREF_CONFIG.displayToast("User already exists...");
-                    } else if(responseCode.equals("failed")) {
-                        MainActivity.PREF_CONFIG.displayToast("Registration unsuccessful...");
                     }
                 } else {
-                    MainActivity.PREF_CONFIG.displayToast("Register: Something went wrong..." + response.code());
+                    String responseCode;
+                    try {
+                        responseCode = NetworkUtils.
+                                extractResponseFromResponseErrorBody(response, "response");
+                    } catch (JSONException | IOException | NetworkUtils.ResponseSuccessfulException e) {
+                        Log.e("WelcomeFrag JSON parse", e.toString());
+                        MainActivity.PREF_CONFIG.displayToast("Bad server response!");
+                        return;
+                    }
+
+                    if(responseCode.equals("exists")) {
+                        MainActivity.PREF_CONFIG.displayToast("User already exists!");
+                    } else if(responseCode.equals("failed")) {
+                        MainActivity.PREF_CONFIG.displayToast("Registration unsuccessful!");
+                    }
                 }
             }
 
@@ -228,7 +236,7 @@ public class RegisterFragment extends AuthFragment {
 
                     onRegisterFormActivity.performAuthChange(
                             user
-                    ); // switch to welcome fragment after image is uploaded
+                    ); // switch to welcome fragment after image is received (uploaded or failed)
                 } else {
                     MainActivity.PREF_CONFIG.displayToast("Image: Something went wrong... " + response.code());
                 }

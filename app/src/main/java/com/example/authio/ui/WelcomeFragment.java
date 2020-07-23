@@ -26,11 +26,17 @@ import com.example.authio.api.OnAuthStateChanged;
 import com.example.authio.models.Token;
 import com.example.authio.models.User;
 import com.example.authio.utils.ImageDownloader;
+import com.example.authio.utils.NetworkUtils;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.concurrent.atomic.AtomicReference;
 
 import retrofit2.Call;
@@ -57,11 +63,6 @@ public class WelcomeFragment extends Fragment {
     public WelcomeFragment() {
         // Required empty public constructor
     }
-
-
-    // render image here on onAttach
-    // sql query with path to image (from sharedprefs?) on different thread
-    // render image with path from server
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -108,7 +109,7 @@ public class WelcomeFragment extends Fragment {
     private void setProfileImageSource() {
         new ImageDownloader(profileImage).execute(APIClient.getBaseURL() +
                 "uploads/" +
-                user.getId() + // TODO: Replace with user instance and API call
+                user.getId() +
                 ".jpg"); // start AsyncTask to asynchronously download and render image upon completion
     }
 
@@ -123,18 +124,26 @@ public class WelcomeFragment extends Fragment {
             @Override
             public void onResponse(Call<User> call, Response<User> response) {
 
-                if((user = response.body()) == null) {
-                    // TODO: Extract in function (w/ reauth call)
-                    displayErrorAndReauth("Something went wrong. " + response.code());
-                }
-
-                String responseCode = user.getResponse();
-
-                if(response.isSuccessful() && responseCode.equals("ok")) {
+                if(response.isSuccessful() && (user = response.body()) != null) {
                     setProfileImageSource();
                     setTextSources();
+                    return;
+                }
 
-                } else if(responseCode.equals("Expired token. Get refresh token.")) {
+                // if the user is null, their token might have expired => get it back w/ refresh token or reauth
+
+                String responseCode;
+                try {
+                    responseCode = NetworkUtils.
+                            extractResponseFromResponseErrorBody(response, "response");
+                } catch (JSONException | IOException | NetworkUtils.ResponseSuccessfulException e) {
+                    Log.e("WelcomeFrag JSON parse", e.toString());
+                    displayErrorAndReauth("Internal server error. Could not fetch response!");
+                    return;
+                }
+
+                if(responseCode != null &&
+                        responseCode.equals("Expired token. Get refresh token.")) {
                     Call<Token> tokenResult = MainActivity.API_OPERATIONS.refreshToken(
                             MainActivity.PREF_CONFIG.readRefreshToken()
                     ); // fetch new token from refresh token
@@ -148,7 +157,7 @@ public class WelcomeFragment extends Fragment {
                                 String responseCode = token.getResponse();
 
                                 if(responseCode.equals("ok")) {
-                                    String jwtToken = token.getJWT();
+                                    String jwtToken = token.getJWT(); // new JWT
 
                                     MainActivity.PREF_CONFIG.writeToken(jwtToken); // refresh jwt is null here! (request doesn't contain it)
 
@@ -160,8 +169,8 @@ public class WelcomeFragment extends Fragment {
                                         @Override
                                         public void onResponse(Call<User> call, Response<User> response) {
                                             if((user = response.body()) == null) {
-                                                // TODO: Extract in function (w/ reauth call)
                                                 displayErrorAndReauth("Could not refetch user! " + response.code());
+                                                return;
                                             }
 
                                             String responseCode = user.getResponse();
@@ -169,19 +178,18 @@ public class WelcomeFragment extends Fragment {
                                             if(response.isSuccessful() && responseCode.equals("ok")) {
                                                 setProfileImageSource();
                                                 setTextSources();
-                                            } else {
-                                                displayErrorAndReauth("Request failed! " + response.code());
                                             }
                                         }
 
                                         @Override
                                         public void onFailure(Call<User> call, Throwable t) {
-                                            displayErrorAndReauth("Could not refetch user! " + response.code());
+                                            displayErrorAndReauth("Internal server error! Could not refetch user! " + response.code());
                                         }
                                     });
                                 }
                             } else {
-                                displayErrorAndReauth("Couldn't get new token! " + response.code());
+                                // entering here means the refresh token has expired and/or can't be read
+                                onAuthStateChanged.performAuthReset();
                             }
                         }
 
@@ -191,7 +199,8 @@ public class WelcomeFragment extends Fragment {
                         }
                     });
                 } else {
-                    displayErrorAndReauth("Invalid token! " + response.code());
+                    // if the token hasn't expired but is corrupted, then just log them out
+                    onAuthStateChanged.performAuthReset();
                 }
             }
 

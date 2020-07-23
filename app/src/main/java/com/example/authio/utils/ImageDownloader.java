@@ -24,7 +24,7 @@ public class ImageDownloader extends AsyncTask<String, Integer, Bitmap> {
         imageViewReference = new WeakReference<>(imageView);
     }
 
-    // params are passed in execute() call; make sure it's only 1
+    // params are passed in execute() call; make sure it's only 1 - the URL path
     @Override
     protected Bitmap doInBackground(String... strings) {
         if(strings.length > 1) {

@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,8 +15,13 @@ import android.view.ViewGroup;
 import com.example.authio.R;
 import com.example.authio.activities.MainActivity;
 import com.example.authio.models.Token;
-import com.example.authio.models.User;
 import com.example.authio.api.OnAuthStateChanged;
+import com.example.authio.utils.NetworkUtils;
+
+import org.json.JSONException;
+
+import java.io.IOException;
+import java.util.Collections;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -81,24 +87,33 @@ public class LoginFragment extends AuthFragment {
             @Override
             public void onResponse(Call<Token> call, Response<Token> response) {
                 Token token;
+                String responseCode;
+
                 if(response.isSuccessful() && (token = response.body()) != null) {
-                    String responseCode = token.getResponse();
+                    responseCode = token.getResponse();
 
                     if (responseCode.equals("ok")) {
-                        // TODO: Get token here and call getUserInfo() here for next fragment
-                        MainActivity.PREF_CONFIG.displayToast("Login successful...");
-
                         MainActivity.PREF_CONFIG.writeToken(token.getJWT());
                         MainActivity.PREF_CONFIG.writeRefreshToken(token.getRefreshJWT());
 
                         onLoginFormActivity.performAuthChange(
                                 null // pass in empty user and get in WelcomeFragment
                         ); // communicate w/ activity to update fragment through interface
-                    } else if (responseCode.equals("failed")) {
-                        MainActivity.PREF_CONFIG.displayToast("Login unsuccessful...");
                     }
                 } else {
-                    MainActivity.PREF_CONFIG.displayToast("Something went wrong...");
+                    try {
+                        responseCode = NetworkUtils.
+                                extractResponseFromResponseErrorBody(response, "response");
+                    } catch (JSONException | IOException | NetworkUtils.ResponseSuccessfulException e) {
+                        Log.e("WelcomeFrag JSON parse", e.toString());
+                        MainActivity.PREF_CONFIG.displayToast("Bad server response!");
+                        return;
+                    }
+
+                    if(responseCode.equals("failed")) {
+                        MainActivity.PREF_CONFIG.displayToast("Login unsuccessful!");
+                    }
+                    // TODO: Handle more errors from API down the line here (if they emerge)
                 }
             }
 
