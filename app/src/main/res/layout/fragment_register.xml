@@ -70,7 +70,9 @@
                 android:layout_margin="10dp"
                 android:ems="10"
                 android:hint="@string/email_hint"
-                android:inputType="textMultiLine|textEmailAddress" />
+                android:inputType="textMultiLine|textEmailAddress"
+                android:maxLines="2"
+                android:singleLine="true" />
 
             <EditText
                 android:id="@+id/password_input_field"
@@ -79,7 +81,9 @@
                 android:layout_margin="10dp"
                 android:ems="10"
                 android:hint="@string/password_hint"
-                android:inputType="textMultiLine|textPassword" />
+                android:inputType="textMultiLine|textPassword"
+                android:maxLines="2"
+                android:singleLine="true" />
 
             <EditText
                 android:id="@+id/username_input_field"
@@ -89,7 +93,9 @@
                 android:capitalize="none"
                 android:ems="10"
                 android:hint="@string/username_hint"
-                android:inputType="textMultiLine|textPersonName|textCapSentences" />
+                android:inputType="textMultiLine|textPersonName|textCapSentences"
+                android:maxLines="2"
+                android:singleLine="true" />
 
             <EditText
                 android:id="@+id/description_input_field"
@@ -99,7 +105,9 @@
                 android:capitalize="sentences"
                 android:ems="10"
                 android:hint="@string/description_hint"
-                android:inputType="textMultiLine|textPersonName|textCapSentences" />
+                android:inputType="textMultiLine|textPersonName|textCapSentences"
+                android:maxLines="2"
+                android:singleLine="true" />
 
             <Button
                 android:id="@+id/auth_button"

@@ -1,5 +1,7 @@
 package com.example.authio.models;
 
+import androidx.annotation.Nullable;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -9,18 +11,22 @@ public class User {
 
     @SerializedName("id")
     @Expose
+    @Nullable
     private Integer id;
 
     @SerializedName("username")
     @Expose
+    @Nullable
     private String username;
 
     @SerializedName("description")
     @Expose
+    @Nullable
     private String description;
 
     @SerializedName("email")
     @Expose
+    @Nullable
     private String email;
 
     @SerializedName("response") // indicates that the field should be serialized to JSON

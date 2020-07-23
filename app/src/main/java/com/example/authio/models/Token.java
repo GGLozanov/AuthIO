@@ -9,21 +9,22 @@ public class Token {
 
     @SerializedName("jwt")
     @Expose
-    String jwt;
+    @Nullable
+    String jwt; // may be null (in failed register/login request)
 
     @SerializedName("refresh_jwt")
     @Expose
     @Nullable
     String refresh_jwt; // may be null (in refresh token request)
 
-    @SerializedName("response")
-    @Expose
-    String response;
-
     @SerializedName("userId")
     @Expose
     @Nullable
     Integer userId; // may be null (in login & refresh token requests)
+
+    @SerializedName("response")
+    @Expose
+    String response;
 
     public String getJWT() {
         return jwt;

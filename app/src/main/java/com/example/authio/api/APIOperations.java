@@ -5,6 +5,7 @@ import com.example.authio.models.Token;
 import com.example.authio.models.User;
 
 import retrofit2.Call;
+import retrofit2.http.Body;
 import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
@@ -35,9 +36,8 @@ public interface APIOperations {
     );
 
     @GET("api/auth/refresh_token.php")
-    @FormUrlEncoded
     Call<Token> refreshToken(
-            @Field("refresh_jwt") String refreshJWT
+            @Header("Authorization") String refreshJWT
     );
 
     @GET("api/service/user_info.php")
