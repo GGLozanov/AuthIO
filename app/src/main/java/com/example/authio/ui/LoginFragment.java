@@ -105,7 +105,7 @@ public class LoginFragment extends AuthFragment {
                         responseCode = NetworkUtils.
                                 extractResponseFromResponseErrorBody(response, "response");
                     } catch (JSONException | IOException | NetworkUtils.ResponseSuccessfulException e) {
-                        Log.e("WelcomeFrag JSON parse", e.toString());
+                        Log.e("LoginFragw JSON parse", e.toString());
                         MainActivity.PREF_CONFIG.displayToast("Bad server response!");
                         return;
                     }

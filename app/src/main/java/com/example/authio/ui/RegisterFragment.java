@@ -159,9 +159,10 @@ public class RegisterFragment extends AuthFragment {
             public void onResponse(Call<Token> call, Response<Token> response) {
                 // handle application-level errors intended from HTTP response here...
                 Token token;
+                String responseCode;
 
                 if(response.isSuccessful() && (token = response.body()) != null) {
-                    String responseCode = token.getResponse();
+                    responseCode = token.getResponse();
 
                     if(responseCode.equals("ok")) {
                         MainActivity.PREF_CONFIG.writeToken(token.getJWT()); // write & save token
@@ -179,12 +180,11 @@ public class RegisterFragment extends AuthFragment {
 
                     }
                 } else {
-                    String responseCode;
                     try {
                         responseCode = NetworkUtils.
                                 extractResponseFromResponseErrorBody(response, "response");
                     } catch (JSONException | IOException | NetworkUtils.ResponseSuccessfulException e) {
-                        Log.e("WelcomeFrag JSON parse", e.toString());
+                        Log.e("RegisterFrag JSON parse", e.toString());
                         MainActivity.PREF_CONFIG.displayToast("Bad server response!");
                         return;
                     }
