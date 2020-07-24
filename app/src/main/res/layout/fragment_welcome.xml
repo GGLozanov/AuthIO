@@ -82,6 +82,7 @@
                 android:layout_marginTop="20dp"
                 android:background="@drawable/round_button"
                 android:drawableLeft="@drawable/ic_exit_to_app_white_24dp"
+                android:padding="10dp"
                 android:text="@string/logout"
                 android:textSize="18sp" />
         </LinearLayout>

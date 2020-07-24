@@ -10,6 +10,8 @@
     <string name="pref_username">com.example.preference_username</string>
     <string name="pref_description">com.example.preference_description</string>
     <string name="pref_id">com.example.preference_id</string>
+    <string name="pref_token">com.example.preference_token</string>
+    <string name="pref_refresh_token">com.example.preference_refresh_token</string>
 
     <string name="email_hint">Enter e-mail</string>
     <string name="username_hint">Enter Username</string>

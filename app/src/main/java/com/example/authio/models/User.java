@@ -1,15 +1,33 @@
-package com.example.authio.api;
+package com.example.authio.models;
+
+import androidx.annotation.Nullable;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 // a transcribed model for an HTTP response from the Web service
-// contains 'response' (status), 'username', 'description', and 'email' at most in a JSON format
-public class UserModel {
+// contains 'response' (status), 'username', 'description', and 'email' (at most) in a JSON format
+public class User {
 
     @SerializedName("id")
     @Expose
+    @Nullable
     private Integer id;
+
+    @SerializedName("username")
+    @Expose
+    @Nullable
+    private String username;
+
+    @SerializedName("description")
+    @Expose
+    @Nullable
+    private String description;
+
+    @SerializedName("email")
+    @Expose
+    @Nullable
+    private String email;
 
     @SerializedName("response") // indicates that the field should be serialized to JSON
     @Expose // indicates the field should be exposed for said JSON serialization
@@ -17,19 +35,7 @@ public class UserModel {
     // the value of the JSON key (constructor argument) should be specified from the Web service used
     // and the response it sends from HTTP
 
-    @SerializedName("username")
-    @Expose
-    private String username;
-
-    @SerializedName("description")
-    @Expose
-    private String description;
-
-    @SerializedName("email")
-    @Expose
-    private String email;
-
-    public UserModel(Integer id, String response, String username, String description, String email) {
+    public User(Integer id, String response, String username, String description, String email) {
         this.id = id;
         this.response = response;
         this.username = username;
