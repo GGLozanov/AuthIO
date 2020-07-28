@@ -12,7 +12,7 @@ import com.example.authio.viewmodels.AuthFragmentViewModel;
 
 public abstract class AuthFragment extends Fragment {
 
-    protected EditText emailInput, passwordInput; // exists in both auth fragments
+    protected EditText emailInput, passwordInput; // props here exist in both auth fragments
 
     protected TextView toggleText;
     protected TextView errorText;

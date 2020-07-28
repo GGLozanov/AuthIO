@@ -40,7 +40,7 @@
                     android:layout_margin="10dp"
                     android:gravity="center"
                     android:padding="15dp"
-                    android:text="@{viewmodel.getUserValue().username}"
+                    android:text="@{viewmodel.user.username}"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -66,7 +66,7 @@
                     android:layout_margin="10dp"
                     android:gravity="center"
                     android:padding="15dp"
-                    android:text="@{viewmodel.getUserValue().description}"
+                    android:text="@{viewmodel.user.description}"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 
@@ -78,7 +78,7 @@
                     android:layout_margin="10dp"
                     android:gravity="center"
                     android:padding="15dp"
-                    android:text="@{viewmodel.getUserValue().email}"
+                    android:text="@{viewmodel.user.email}"
                     android:textSize="18sp"
                     android:textStyle="bold" />
 

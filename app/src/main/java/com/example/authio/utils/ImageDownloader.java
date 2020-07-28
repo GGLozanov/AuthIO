@@ -36,7 +36,7 @@ public class ImageDownloader extends AsyncTask<String, Integer, Bitmap> {
         try {
             url = new URL(strings[0]);
         } catch (MalformedURLException e) {
-            Log.e("WelcomeFragment: ", e.toString());
+            Log.e("WelcomeFragment", e.toString());
             return null;
         }
 
@@ -46,7 +46,7 @@ public class ImageDownloader extends AsyncTask<String, Integer, Bitmap> {
         try {
             content = (InputStream) url.getContent(); // get image displayed
         } catch (IOException e) {
-            Log.e("WelcomeFragment: ", e.toString());
+            Log.e("WelcomeFragment", e.toString());
             return null;
         }
 

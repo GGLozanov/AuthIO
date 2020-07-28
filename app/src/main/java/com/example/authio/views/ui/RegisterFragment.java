@@ -17,6 +17,7 @@ import androidx.lifecycle.ViewModelProvider;
 
 import android.provider.MediaStore;
 import android.util.Log;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +27,6 @@ import android.widget.ImageView;
 import com.example.authio.R;
 import com.example.authio.utils.PrefConfig;
 import com.example.authio.viewmodels.RegisterFragmentViewModel;
-import com.example.authio.views.activities.BaseActivity;
 import com.example.authio.models.Image;
 import com.example.authio.models.User;
 import com.example.authio.api.OnAuthStateChanged;
@@ -63,7 +63,8 @@ public class RegisterFragment extends AuthFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_register, container, false);
 
-        viewModel = new ViewModelProvider(requireActivity()).get(RegisterFragmentViewModel.class);
+        viewModel = new ViewModelProvider(requireActivity())
+                .get(RegisterFragmentViewModel.class);
         viewModel.init();
 
         initAuthFields(view);
@@ -83,12 +84,6 @@ public class RegisterFragment extends AuthFragment {
 
         return view;
     }
-
-    // get image from upload here
-    // upload it to server by encoding it to base64
-    // add onClickListener for ImageView
-    // handle if image is never clicked (profile pic is never changed), then use default_img image in query and data
-    // download default_img image and put it into uploads
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -136,20 +131,20 @@ public class RegisterFragment extends AuthFragment {
                 username = usernameInput.getText().toString(),
                 description = descriptionInput.getText().toString();
 
-        if(email.isEmpty() || password.isEmpty() || username.isEmpty() || description.isEmpty()) {
+        if((email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches())
+                || password.isEmpty() || username.isEmpty() || description.isEmpty()) {
             showErrorMessage("Invalid info in fields!");
             return;
         }
 
         hideErrorMessage();
 
-
         ((RegisterFragmentViewModel) viewModel).getRegisterToken(email, username, password, description)
                 .observe(this, (token) -> {
                     if(token != null) {
                         PrefConfig prefConfig;
 
-                        if((prefConfig = BaseActivity.PREF_CONFIG_REFERENCE.get()) != null) {
+                        if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
                             String responseCode = token.getResponse();
 
                             if(responseCode.equals("ok")) {
@@ -174,7 +169,7 @@ public class RegisterFragment extends AuthFragment {
                                 prefConfig.displayToast(responseCode);
                             }
                         } else {
-                            // TODO: Handle error
+                            Log.e("No reference", "Found no reference to sharedpreferences in RegisterFragment.");
                         }
                     }
                 });
@@ -193,7 +188,7 @@ public class RegisterFragment extends AuthFragment {
                 if(response != null) {
                     PrefConfig prefConfig;
 
-                    if((prefConfig = BaseActivity.PREF_CONFIG_REFERENCE.get()) != null) {
+                    if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
                         String responseCode = response.getResponse();
 
                         if(responseCode.equals("Image Uploaded")) {
@@ -211,8 +206,5 @@ public class RegisterFragment extends AuthFragment {
                     }
                 }
         });
-
-
-
     }
 }

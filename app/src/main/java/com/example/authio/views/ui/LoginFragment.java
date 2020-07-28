@@ -1,8 +1,6 @@
 package com.example.authio.views.ui;
 
 
-import com.example.authio.views.activities.BaseActivity;
-
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
@@ -10,6 +8,7 @@ import android.os.Bundle;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +17,7 @@ import com.example.authio.R;
 import com.example.authio.utils.PrefConfig;
 import com.example.authio.viewmodels.LoginFragmentViewModel;
 import com.example.authio.api.OnAuthStateChanged;
+import com.example.authio.views.activities.MainActivity;
 
 
 /**
@@ -78,7 +78,7 @@ public class LoginFragment extends AuthFragment {
                     if(token != null) {
                         PrefConfig prefConfig;
 
-                        if((prefConfig = BaseActivity.PREF_CONFIG_REFERENCE.get()) != null) {
+                        if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
                             String responseCode = token.getResponse();
 
                             if(responseCode.equals("ok")) {
@@ -96,7 +96,7 @@ public class LoginFragment extends AuthFragment {
                             }
                             // TODO: Handle more errors from API down the line here (if they emerge)
                         } else {
-                            // TODO: Handle error
+                            Log.e("No reference", "Found no reference to sharedpreferences in LoginFragment.");
                         }
                     }
                 });

@@ -24,8 +24,14 @@ public class WelcomeFragmentViewModel extends ViewModel {
     }
 
     public LiveData<User> setUser(User user) {
-        mUser = new MutableLiveData<>();
+        if(mUser == null) {
+            mUser = new MutableLiveData<>();
+        }
         mUser.setValue(user);
+        return mUser;
+    }
+
+    public LiveData<User> getUser() {
         return mUser;
     }
 

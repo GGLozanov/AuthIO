@@ -1,6 +1,7 @@
 package com.example.authio.views.activities;
 
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 
 import android.content.Intent;
@@ -15,16 +16,20 @@ import com.example.authio.views.ui.LoginFragment;
 import com.example.authio.views.ui.RegisterFragment;
 import com.example.authio.views.ui.WelcomeFragment;
 
+import java.lang.ref.WeakReference;
+
 // TODO: Separate into AuthActivity and MainActivity
-public class MainActivity extends BaseActivity implements
+public class MainActivity extends AppCompatActivity implements
         LoginFragment.OnLoginFormActivity, RegisterFragment.OnRegisterFormActivity, OnAuthStateChanged {
 
+    public static WeakReference<PrefConfig> PREF_CONFIG_REFERENCE; // weak reference due to requiring activity context => avoid memory leak
     PrefConfig prefConfig;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        PREF_CONFIG_REFERENCE = new WeakReference<>(new PrefConfig(this));
 
         // TODO: Safeguard fragment instances with findFragmentByTag() calls before
         if(findViewById(R.id.fragment_container) != null) {
@@ -45,7 +50,7 @@ public class MainActivity extends BaseActivity implements
                     // add the Login fragment to the container (always commit transactions)
                 }
             } else {
-                Log.e("No reference", "Found no reference to prefs.");
+                Log.e("No reference", "Found no reference to sharedpreferences in MainActivity.");
                 replaceCurrentFragment(new LoginFragment());
             }
         }
