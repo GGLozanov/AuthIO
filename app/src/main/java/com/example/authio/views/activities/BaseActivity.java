@@ -5,12 +5,12 @@ import android.os.Bundle;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.example.authio.api.PrefConfig;
+import com.example.authio.utils.PrefConfig;
 
 import java.lang.ref.WeakReference;
 
-public abstract class Activity extends AppCompatActivity {
-    public static WeakReference<PrefConfig> PREF_CONFIG_REFERENCE;
+public abstract class BaseActivity extends AppCompatActivity {
+    public static WeakReference<PrefConfig> PREF_CONFIG_REFERENCE; // weak reference due to requiring activity context => avoid memory leak
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {

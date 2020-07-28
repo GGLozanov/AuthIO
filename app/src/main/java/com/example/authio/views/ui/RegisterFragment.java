@@ -1,4 +1,4 @@
-package com.example.authio.ui;
+package com.example.authio.views.ui;
 
 
 import android.app.Activity;
@@ -13,6 +13,7 @@ import android.os.Bundle;
 
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
 import android.provider.MediaStore;
 import android.util.Log;
@@ -23,21 +24,16 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.example.authio.R;
-import com.example.authio.activities.MainActivity;
+import com.example.authio.utils.PrefConfig;
+import com.example.authio.viewmodels.RegisterFragmentViewModel;
+import com.example.authio.views.activities.BaseActivity;
 import com.example.authio.models.Image;
-import com.example.authio.models.Token;
 import com.example.authio.models.User;
 import com.example.authio.api.OnAuthStateChanged;
 import com.example.authio.utils.ImageUtils;
-import com.example.authio.utils.NetworkUtils;
+import com.example.authio.views.activities.MainActivity;
 
 import java.io.IOException;
-
-import org.json.JSONException;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -67,8 +63,10 @@ public class RegisterFragment extends AuthFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_register, container, false);
 
-        initAuthFields(view);
+        viewModel = new ViewModelProvider(requireActivity()).get(RegisterFragmentViewModel.class);
+        viewModel.init();
 
+        initAuthFields(view);
         initListeners((v) -> onRegisterFormActivity.performToggleToLogin(), (v) -> performRegister());
 
         usernameInput = view.findViewById(R.id.username_input_field);
@@ -145,64 +143,41 @@ public class RegisterFragment extends AuthFragment {
 
         hideErrorMessage();
 
-        Call<Token> authResult = MainActivity
-                .API_OPERATIONS
-                .performRegistration(
-                        email,
-                        username,
-                        password,
-                        description
-                );
 
-        authResult.enqueue(new Callback<Token>() {
-            @Override
-            public void onResponse(Call<Token> call, Response<Token> response) {
-                // handle application-level errors intended from HTTP response here...
-                Token token;
-                String responseCode;
+        ((RegisterFragmentViewModel) viewModel).getRegisterToken(email, username, password, description)
+                .observe(this, (token) -> {
+                    if(token != null) {
+                        PrefConfig prefConfig;
 
-                if(response.isSuccessful() && (token = response.body()) != null) {
-                    responseCode = token.getResponse();
+                        if((prefConfig = BaseActivity.PREF_CONFIG_REFERENCE.get()) != null) {
+                            String responseCode = token.getResponse();
 
-                    if(responseCode.equals("ok")) {
-                        MainActivity.PREF_CONFIG.writeToken(token.getJWT()); // write & save token
-                        MainActivity.PREF_CONFIG.writeRefreshToken(token.getRefreshJWT()); // write & save refresh token
+                            if(responseCode.equals("ok")) {
+                                prefConfig.writeToken(token.getJWT()); // write & save token
+                                prefConfig.writeRefreshToken(token.getRefreshJWT()); // write & save refresh token
 
-                        Integer userId = token.getUserId();
+                                Integer userId = token.getUserId();
 
-                        uploadImageAndAuth(new User(
-                                userId,
-                                responseCode,
-                                username,
-                                description,
-                                email
-                        )); // go on to upload the image if the registration was successful
-
+                                uploadImageAndAuth(new User(
+                                        userId,
+                                        responseCode,
+                                        username,
+                                        description,
+                                        email
+                                )); // go on to upload the image if the registration was successful
+                            } else if(responseCode.equals("exists")) {
+                                prefConfig.displayToast("User already exists!");
+                            } else if(responseCode.equals("failed")) {
+                                prefConfig.displayToast("Registration unsuccessful!");
+                            } else {
+                                // internal server error
+                                prefConfig.displayToast(responseCode);
+                            }
+                        } else {
+                            // TODO: Handle error
+                        }
                     }
-                } else {
-                    try {
-                        responseCode = NetworkUtils.
-                                extractResponseFromResponseErrorBody(response, "response");
-                    } catch (JSONException | IOException | NetworkUtils.ResponseSuccessfulException e) {
-                        Log.e("RegisterFrag JSON parse", e.toString());
-                        MainActivity.PREF_CONFIG.displayToast("Bad server response!");
-                        return;
-                    }
-
-                    if(responseCode.equals("exists")) {
-                        MainActivity.PREF_CONFIG.displayToast("User already exists!");
-                    } else if(responseCode.equals("failed")) {
-                        MainActivity.PREF_CONFIG.displayToast("Registration unsuccessful!");
-                    }
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Token> call, Throwable t) {
-                // handle failed HTTP response receiving due to server-side exception here
-                MainActivity.PREF_CONFIG.displayToast(t.getMessage());
-            }
-        });
+                });
     }
 
     private void uploadImageAndAuth(User user) {
@@ -211,46 +186,33 @@ public class RegisterFragment extends AuthFragment {
             return; // don't upload picture if it's the default
         }
 
-        String image = ImageUtils.encodeImage(bitmap);
+        ((RegisterFragmentViewModel) viewModel).uploadUserImage(
+                new Image(user.getId().toString(), null, ImageUtils.encodeImage(bitmap)))
+                .observe(this, (response) -> {
+                    // TODO: Extract handling in viewmodel (leave this to just update the UI)?
+                if(response != null) {
+                    PrefConfig prefConfig;
 
-        Call<Image> imageUploadResult = MainActivity
-                .API_OPERATIONS
-                .performImageUpload(
-                    user.getId().toString(),
-                    image
-                );
+                    if((prefConfig = BaseActivity.PREF_CONFIG_REFERENCE.get()) != null) {
+                        String responseCode = response.getResponse();
 
+                        if(responseCode.equals("Image Uploaded")) {
+                            prefConfig.displayToast("Image uploaded...");
+                        } else if(responseCode.equals("Image Upload Failed")) {
+                            prefConfig.displayToast("Image upload failed...");
+                        } else {
+                            // internal server error
+                            prefConfig.displayToast("Image: Something went wrong... " + responseCode);
+                        }
 
-        imageUploadResult.enqueue(new Callback<Image>() {
-            @Override
-            public void onResponse(Call<Image> call, Response<Image> response) {
-                Image image;
-                if(response.isSuccessful() && (image = response.body()) != null) {
-                    String responseCode = image.getResponse();
-
-                    if(responseCode.equals("Image Uploaded")) {
-                        MainActivity.PREF_CONFIG.displayToast("Image uploaded...");
-                    } else if(responseCode.equals("Image Upload Failed")) {
-                        MainActivity.PREF_CONFIG.displayToast("Image upload failed...");
+                        onRegisterFormActivity.performAuthChange(
+                                user
+                        ); // switch to welcome fragment after image is received (uploaded or failed)
                     }
-
-                    onRegisterFormActivity.performAuthChange(
-                            user
-                    ); // switch to welcome fragment after image is received (uploaded or failed)
-                } else {
-                    MainActivity.PREF_CONFIG.displayToast("Image: Something went wrong... " + response.code());
                 }
-            }
-
-            @Override
-            public void onFailure(Call<Image> call, Throwable t) {
-                MainActivity.PREF_CONFIG.displayToast("Something went wrong " + t.toString());
-            }
         });
 
-        // TODO: Convert this to asynchronous execution and have AsyncTask in WelcomeFragment wait for this thread's execution (wait/notify)
-        // execute upload synchronously for the user to have image immediately rendered upon login
-        // immediately join after start for synchronous execution
+
 
     }
 }

@@ -1,31 +1,24 @@
-package com.example.authio.ui;
+package com.example.authio.views.ui;
 
+
+import com.example.authio.views.activities.BaseActivity;
 
 import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.ViewModelProvider;
 
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.authio.R;
-import com.example.authio.activities.MainActivity;
-import com.example.authio.models.Token;
+import com.example.authio.utils.PrefConfig;
+import com.example.authio.viewmodels.LoginFragmentViewModel;
 import com.example.authio.api.OnAuthStateChanged;
-import com.example.authio.utils.NetworkUtils;
 
-import org.json.JSONException;
-
-import java.io.IOException;
-import java.util.Collections;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -52,6 +45,10 @@ public class LoginFragment extends AuthFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_login, container, false);
 
+        viewModel = new ViewModelProvider(requireActivity())
+                .get(LoginFragmentViewModel.class);
+        viewModel.init();
+
         initAuthFields(view);
         initListeners((v) -> onLoginFormActivity.performToggleToRegister(), (v) -> performLogin());
 
@@ -61,7 +58,7 @@ public class LoginFragment extends AuthFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        // implicit casting
+        // explicit downcasting
         Activity activity = (Activity) context;
         onLoginFormActivity = (OnLoginFormActivity) activity;
     }
@@ -76,53 +73,33 @@ public class LoginFragment extends AuthFragment {
         }
         hideErrorMessage();
 
-        Call<Token> authResult = MainActivity
-                .API_OPERATIONS
-                .performLogin(
-                  email,
-                  password
-                );
+        ((LoginFragmentViewModel) viewModel).getLoginToken(email, password)
+                .observe(this, (token) -> {
+                    if(token != null) {
+                        PrefConfig prefConfig;
 
-        authResult.enqueue(new Callback<Token>() {
-            @Override
-            public void onResponse(Call<Token> call, Response<Token> response) {
-                Token token;
-                String responseCode;
+                        if((prefConfig = BaseActivity.PREF_CONFIG_REFERENCE.get()) != null) {
+                            String responseCode = token.getResponse();
 
-                if(response.isSuccessful() && (token = response.body()) != null) {
-                    responseCode = token.getResponse();
+                            if(responseCode.equals("ok")) {
+                                prefConfig.writeToken(token.getJWT());
+                                prefConfig.writeRefreshToken(token.getRefreshJWT());
 
-                    if (responseCode.equals("ok")) {
-                        MainActivity.PREF_CONFIG.writeToken(token.getJWT());
-                        MainActivity.PREF_CONFIG.writeRefreshToken(token.getRefreshJWT());
-
-                        onLoginFormActivity.performAuthChange(
-                                null // pass in empty user and get in WelcomeFragment
-                        ); // communicate w/ activity to update fragment through interface
+                                onLoginFormActivity.performAuthChange(
+                                        null // pass in empty user and get in WelcomeFragment
+                                ); // communicate w/ activity to update fragment through interface
+                            } else if(responseCode.equals("failed")) {
+                                prefConfig.displayToast("Login unsuccessful!");
+                            } else {
+                                // internal server error
+                                prefConfig.displayToast("Login: Something went wrong... " + responseCode);
+                            }
+                            // TODO: Handle more errors from API down the line here (if they emerge)
+                        } else {
+                            // TODO: Handle error
+                        }
                     }
-                } else {
-                    try {
-                        responseCode = NetworkUtils.
-                                extractResponseFromResponseErrorBody(response, "response");
-                    } catch (JSONException | IOException | NetworkUtils.ResponseSuccessfulException e) {
-                        Log.e("LoginFragw JSON parse", e.toString());
-                        MainActivity.PREF_CONFIG.displayToast("Bad server response!");
-                        return;
-                    }
-
-                    if(responseCode.equals("failed")) {
-                        MainActivity.PREF_CONFIG.displayToast("Login unsuccessful!");
-                    }
-                    // TODO: Handle more errors from API down the line here (if they emerge)
-                }
-            }
-
-            @Override
-            public void onFailure(Call<Token> call, Throwable t) {
-                // handle failed HTTP response receiving due to server-side exception here
-                MainActivity.PREF_CONFIG.displayToast(t.getMessage());
-            }
-        });
+                });
 
         emailInput.setText("");
         passwordInput.setText("");
