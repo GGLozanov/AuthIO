@@ -3,7 +3,7 @@ package com.example.authio.models;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Image {
+public class Image extends Model {
 
     @SerializedName("title")
     @Expose
@@ -13,9 +13,17 @@ public class Image {
     @Expose
     private String image; // base64 image
 
-    @SerializedName("response")
-    @Expose
-    private String response; // response from server
+    /**
+     *
+     * @param title - Image title. Used in the backend for storing the picture and correlating it to the user. Value is always user id.
+     * @param response - Custom API status message received from call
+     * @param image
+     */
+    public Image(String title, String response, String image) {
+        super(response);
+        this.title = title;
+        this.image = image;
+    }
 
     public String getTitle() {
         return title;
@@ -25,7 +33,4 @@ public class Image {
         return image;
     }
 
-    public String getResponse() {
-        return response;
-    }
 }
