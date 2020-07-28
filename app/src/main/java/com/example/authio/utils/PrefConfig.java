@@ -1,4 +1,4 @@
-package com.example.authio.api;
+package com.example.authio.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
