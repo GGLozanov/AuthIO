@@ -38,7 +38,7 @@ public class ImageRepository extends Repository<Image> { // designed to make an 
             public void onResponse(Call<Model> call, Response<Model> response) {
                 Model model;
                 if(response.isSuccessful() && (model = response.body()) != null) {
-                    mModel.setValue(model); // will notify observers once set from async call
+                    mModel.setValue(model); // will notify observers once set from async call again here
                 } else {
                     mModel.setValue(Model.asFailed(response.message()));
                 }

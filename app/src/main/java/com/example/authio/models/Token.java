@@ -37,6 +37,18 @@ public class Token extends Model {
         this.userId = userId;
     }
 
+    /**
+     *
+     * @param response - Custom API status message received from call
+     */
+    private Token(String response) {
+        super(response);
+    }
+
+    public static Token asFailed(String response) { // couldn't use base class method due to casting issues; FIXME optimise this repetition for all models
+        return new Token(response);
+    } // abstract this constructor call for semantic ease
+
     public String getJWT() {
         return jwt;
     }

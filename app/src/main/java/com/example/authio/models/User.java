@@ -3,6 +3,7 @@ package com.example.authio.models;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.gson.annotations.Expose;
@@ -47,6 +48,18 @@ public class User extends Model implements Parcelable {
         this.username = username;
         this.description = description;
         this.email = email;
+    }
+
+    /**
+     *
+     * @param response - Custom API status message received from call
+     */
+    private User(String response) {
+        super(response);
+    }
+
+    public static User asFailed(String response) { // couldn't use base class method due to casting issues; FIXME optimise this repetition for all models
+        return new User(response);
     }
 
     public User(Parcel in) {
@@ -107,5 +120,11 @@ public class User extends Model implements Parcelable {
         if(email != null) {
             dest.writeString(email);
         }
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "[" + id + ", " + username + ", " + description + ", " + email + "]";
     }
 }

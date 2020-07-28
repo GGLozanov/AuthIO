@@ -5,11 +5,7 @@ import android.util.Log;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.authio.models.Token;
-import com.example.authio.models.User;
 import com.example.authio.utils.NetworkUtils;
-import com.example.authio.utils.PrefConfig;
-import com.example.authio.views.activities.BaseActivity;
-import com.example.authio.views.activities.MainActivity;
 
 import org.json.JSONException;
 
@@ -59,14 +55,14 @@ public class TokenRepository extends Repository<Token> { // designed to make an 
                         return;
                     }
 
-                    mToken.setValue((Token) Token.asFailed(responseCode)); // FIXME might change this to just a constructor (semantically unclear but no casting)
+                    mToken.setValue(Token.asFailed(responseCode));
                 }
             }
 
             @Override
             public void onFailure(Call<Token> call, Throwable t) {
                 // handle failed HTTP response receiving due to server-side exception here
-                mToken.setValue((Token) Token.asFailed(t.getMessage()));
+                mToken.setValue(Token.asFailed(t.getMessage()));
             }
         });
 
@@ -102,14 +98,14 @@ public class TokenRepository extends Repository<Token> { // designed to make an 
                         return;
                     }
 
-                    mToken.setValue((Token) Token.asFailed(responseCode)); // FIXME might change this to just a constructor (semantically unclear but no casting)
+                    mToken.setValue(Token.asFailed(responseCode));
                 }
             }
 
             @Override
             public void onFailure(Call<Token> call, Throwable t) {
                 // handle failed HTTP response receiving due to server-side exception here
-                mToken.setValue((Token) Token.asFailed(t.getMessage()));
+                mToken.setValue(Token.asFailed(t.getMessage()));
             }
         });
 

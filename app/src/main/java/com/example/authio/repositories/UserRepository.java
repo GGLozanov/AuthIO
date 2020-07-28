@@ -8,7 +8,6 @@ import com.example.authio.models.Token;
 import com.example.authio.models.User;
 import com.example.authio.utils.NetworkUtils;
 import com.example.authio.utils.PrefConfig;
-import com.example.authio.views.activities.BaseActivity;
 import com.example.authio.views.activities.MainActivity;
 
 import org.json.JSONException;
@@ -55,7 +54,7 @@ public class UserRepository extends Repository<User> { // designed to make an AP
                 } catch (JSONException | IOException | NetworkUtils.ResponseSuccessfulException e) {
                     Log.e("WelcomeFrag JSON parse", e.toString());
                     // displayErrorAndReauth("Internal server error. Could not fetch response!");
-                    mUser.setValue((User) User.asFailed("Internal server error. Could not fetch reponse!"));
+                    mUser.setValue(User.asFailed("Internal server error. Could not fetch reponse!"));
                     return;
                 }
 
@@ -79,11 +78,11 @@ public class UserRepository extends Repository<User> { // designed to make an AP
                                     PrefConfig prefConfig;
 
                                     // TODO: Try to find a way to extract sharedprefs from here and modularise app (this is an exception but try to change that)
-                                    if((prefConfig = BaseActivity.PREF_CONFIG_REFERENCE.get()) != null) {
+                                    if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
                                         prefConfig.writeToken(jwtToken); // refresh jwt is null here! (request doesn't contain it)
                                     } else {
                                         // TODO: Handle error
-                                        Log.e("TokenRepo Refresh", "Couldn't access sharedpreferences from Token Repository");
+                                        Log.e("TokenRepo Refresh", "Couldn't access sharedpreferences from User Repository");
                                         return;
                                     }
 
@@ -91,17 +90,17 @@ public class UserRepository extends Repository<User> { // designed to make an AP
                                 }
                             } else {
                                 // entering here means the refresh token has expired and/or can't be read
-                                mUser.setValue((User) User.asFailed("Reauth")); // if message = "Reauth", just reauth
+                                mUser.setValue(User.asFailed("Reauth")); // if message = "Reauth", just reauth
                             }
                         }
 
                         @Override
                         public void onFailure(Call<Token> call, Throwable t) {
-                            mUser.setValue((User) User.asFailed("Failed: " + t.getMessage())); // if message = "Failed", displayErrorAndReauth()
+                            mUser.setValue(User.asFailed("Failed: " + t.getMessage())); // if message = "Failed", displayErrorAndReauth()
                         }
                     });
                 } else {
-                    mUser.setValue((User) User.asFailed("Reauth")); // if message = "Reauth", just reauth
+                    mUser.setValue(User.asFailed("Reauth")); // if message = "Reauth", just reauth
 
                     // if the token hasn't expired but is corrupted, then just log them out
                     // onAuthStateChanged.performAuthReset();
@@ -110,7 +109,7 @@ public class UserRepository extends Repository<User> { // designed to make an AP
 
             @Override
             public void onFailure(Call<User> call, Throwable t) {
-                mUser.setValue((User) User.asFailed("Failed: " + t.getMessage()));
+                mUser.setValue(User.asFailed("Failed: " + t.getMessage()));
             }
         });
 
