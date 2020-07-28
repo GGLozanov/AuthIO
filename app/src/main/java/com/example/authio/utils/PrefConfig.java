@@ -6,9 +6,6 @@ import android.widget.Toast;
 
 import com.example.authio.R;
 
-// TODO: Tear down this config and make WelcomeFragment retrieve user with API call each time (important)
-// this cannot scale well so replace it
-
 public class PrefConfig {
     private SharedPreferences sharedPreferences;
     private Context context; // context used for sharedpreferences init and access operations for string resources
