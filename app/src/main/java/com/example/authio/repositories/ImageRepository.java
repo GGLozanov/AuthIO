@@ -1,10 +1,26 @@
 package com.example.authio.repositories;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Looper;
+import android.util.Log;
+
+import androidx.core.os.HandlerCompat;
 import androidx.lifecycle.MutableLiveData;
 
+import com.example.authio.api.APIClient;
 import com.example.authio.models.Image;
 import com.example.authio.models.Model;
+import com.example.authio.utils.ImageDownloader;
 import com.example.authio.views.activities.MainActivity;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.concurrent.atomic.AtomicReference;
+
+import android.os.Handler;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -50,10 +66,23 @@ public class ImageRepository extends Repository<Image> { // designed to make an 
             }
         });
 
-        // TODO: Convert this to asynchronous execution and have AsyncTask in WelcomeFragment wait for this thread's execution (wait/notify)
         // execute upload synchronously for the user to have image immediately rendered upon login
         // immediately join after start for synchronous execution
 
         return mModel;
     }
+
+    // downloads the image asynchronously and returns the livedata reference used in the UI
+    // (updates notifiers when async call completes)
+    public MutableLiveData<Bitmap> downloadImage(Integer userId) {
+        MutableLiveData<Bitmap> mBitmap = new MutableLiveData<>();
+
+        new ImageDownloader(mBitmap).execute(APIClient.getBaseURL() +
+                "uploads/" +
+                userId +
+                ".jpg");
+
+        return mBitmap;
+    }
+
 }

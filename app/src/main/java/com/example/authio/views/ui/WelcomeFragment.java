@@ -8,8 +8,6 @@ import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.os.Handler;
-import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,21 +20,21 @@ import com.example.authio.databinding.FragmentWelcomeBinding;
 import com.example.authio.utils.PrefConfig;
 import com.example.authio.viewmodels.WelcomeFragmentViewModel;
 import com.example.authio.views.activities.MainActivity;
-import com.example.authio.api.APIClient;
 import com.example.authio.api.OnAuthStateChanged;
 import com.example.authio.models.User;
-import com.example.authio.utils.ImageDownloader;
 
 /**
  * A simple {@link Fragment} subclass.
  */
 public class WelcomeFragment extends Fragment {
-    private ImageView profileImage;
-    private Button logoutButton;
-
     private OnAuthStateChanged onAuthStateChanged; // listener for performing logout
 
     private PrefConfig prefConfig;
+
+    private ImageView profileImage;
+    private Button logoutButton;
+
+    private WelcomeFragmentViewModel viewModel;
 
     public WelcomeFragment() {
         // Required empty public constructor
@@ -46,7 +44,7 @@ public class WelcomeFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        WelcomeFragmentViewModel viewModel = new ViewModelProvider(requireActivity())
+        viewModel = new ViewModelProvider(requireActivity())
                 .get(WelcomeFragmentViewModel.class);
         viewModel.init();
 
@@ -97,7 +95,9 @@ public class WelcomeFragment extends Fragment {
             String responseCode = user.getResponse();
 
             if(responseCode.equals("ok")) {
-                renderProfileImage(user.getId());
+                viewModel.getImageBitmap(user.getId())
+                        .observe(this, (bitmap) ->
+                                profileImage.setImageBitmap(bitmap));
             } else if(responseCode.equals("Reauth")) {
                 onAuthStateChanged.performAuthReset();
             } else if(responseCode.contains("Failed: ")) {
@@ -106,13 +106,6 @@ public class WelcomeFragment extends Fragment {
         } else {
             Log.w("WelcomeFragment", "No user found to be observed");
         }
-    }
-
-    private void renderProfileImage(int userId) {
-        new ImageDownloader(profileImage).execute(APIClient.getBaseURL() +
-                "uploads/" +
-                userId +
-                ".jpg"); // start AsyncTask to asynchronously download and render image upon completion
     }
 
     private void displayErrorAndReauth(String error) {

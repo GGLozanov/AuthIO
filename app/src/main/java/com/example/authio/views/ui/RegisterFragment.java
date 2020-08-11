@@ -139,6 +139,7 @@ public class RegisterFragment extends AuthFragment {
 
         hideErrorMessage();
 
+        // TODO: Need to handle different responses in viewmodel and not here (breaks MVVM a bit)
         ((RegisterFragmentViewModel) viewModel).getRegisterToken(email, username, password, description)
                 .observe(this, (token) -> {
                     if(token != null) {
