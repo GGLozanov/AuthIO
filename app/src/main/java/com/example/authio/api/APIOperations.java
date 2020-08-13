@@ -1,6 +1,7 @@
 package com.example.authio.api;
 
 import com.example.authio.models.Image;
+import com.example.authio.models.Model;
 import com.example.authio.models.Token;
 import com.example.authio.models.User;
 
@@ -28,7 +29,6 @@ public interface APIOperations {
     // (w/ generic type of our custom model)
     // Query annotation receives the value of the query parameter at the given script's URL
 
-    // TODO: Change call to return token
     @GET("api/auth/login.php") // send a GET request to receive the result of this php script
     Call<Token> performLogin(
             @Query("email") String email,
@@ -48,7 +48,7 @@ public interface APIOperations {
 
     @POST("api/service/image.php")
     @FormUrlEncoded
-    Call<Image> performImageUpload(
+    Call<Model> performImageUpload(
             @Field("title") String title, // title is user id (change to integer client and server side)
             @Field("image") String image
     );

@@ -11,7 +11,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         android:usesCleartextTraffic="true" > <!--Gives cleartext perms for web server interaction-->
-        <activity android:name=".activities.MainActivity"
+        <activity android:name=".views.activities.MainActivity"
             android:screenOrientation="portrait"
             android:configChanges="keyboardHidden|orientation|screenSize" >
             <intent-filter>

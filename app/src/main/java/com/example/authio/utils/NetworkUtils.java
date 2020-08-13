@@ -1,9 +1,5 @@
 package com.example.authio.utils;
 
-import android.util.Log;
-
-import com.example.authio.activities.MainActivity;
-
 import org.json.JSONException;
 import org.json.JSONObject;
 

@@ -1,13 +1,10 @@
-package com.example.authio.api;
+package com.example.authio.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.widget.Toast;
 
 import com.example.authio.R;
-
-// TODO: Tear down this config and make WelcomeFragment retrieve user with API call each time (important)
-// this cannot scale well so replace it
 
 public class PrefConfig {
     private SharedPreferences sharedPreferences;

@@ -1,5 +1,9 @@
 package com.example.authio.models;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.gson.annotations.Expose;
@@ -7,7 +11,8 @@ import com.google.gson.annotations.SerializedName;
 
 // a transcribed model for an HTTP response from the Web service
 // contains 'response' (status), 'username', 'description', and 'email' (at most) in a JSON format
-public class User {
+// implements Parcelable in order to be sent through intents using Bundle args
+public class User extends Model implements Parcelable {
 
     @SerializedName("id")
     @Expose
@@ -29,25 +34,43 @@ public class User {
     @Nullable
     private String email;
 
-    @SerializedName("response") // indicates that the field should be serialized to JSON
-    @Expose // indicates the field should be exposed for said JSON serialization
-    private String response; // i.e. the field is part of a JSON format and the name inside is the field value (key)
-    // the value of the JSON key (constructor argument) should be specified from the Web service used
-    // and the response it sends from HTTP
-
-    public User(Integer id, String response, String username, String description, String email) {
+    /**
+     *
+     * @param id - Given user's id
+     * @param response - Custom API status message received from call
+     * @param username - Given user's username
+     * @param description - Given user's description
+     * @param email - Given user's email
+     */
+    public User(@Nullable Integer id, String response, @Nullable String username, @Nullable String description, @Nullable String email) {
+        super(response);
         this.id = id;
-        this.response = response;
         this.username = username;
         this.description = description;
         this.email = email;
     }
 
-    public Integer getId() { return id; }
-
-    public String getResponse() {
-        return response;
+    /**
+     *
+     * @param response - Custom API status message received from call
+     */
+    private User(String response) {
+        super(response);
     }
+
+    public static User asFailed(String response) { // couldn't use base class method due to casting issues; FIXME optimise this repetition for all models
+        return new User(response);
+    }
+
+    public User(Parcel in) {
+        super(in.readString());
+        this.id = in.readInt();
+        this.username = in.readString();
+        this.description = in.readString();
+        this.email = in.readString();
+    }
+
+    public Integer getId() { return id; }
 
     public String getUsername() {
         return username;
@@ -59,5 +82,49 @@ public class User {
 
     public String getEmail() {
         return email;
+    }
+
+    public static final Parcelable.Creator CREATOR = new Parcelable.Creator() { // creator used to convert parcelables to model
+        public User createFromParcel(Parcel in) {
+            return new User(in);
+        }
+
+        public User[] newArray(int size) {
+            return new User[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return hashCode();
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        if(response != null) {
+            dest.writeString(response);
+        }
+
+        if(id != null) {
+            dest.writeInt(id);
+        }
+
+        if(username != null) {
+            dest.writeString(username);
+        }
+
+        if(description != null) {
+            dest.writeString(description);
+        }
+
+        if(email != null) {
+            dest.writeString(email);
+        }
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "[" + id + ", " + username + ", " + description + ", " + email + "]";
     }
 }
