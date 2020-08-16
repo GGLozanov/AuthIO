@@ -1,11 +1,8 @@
 package com.example.authio.viewmodels;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
-import androidx.lifecycle.ViewModel;
-import com.example.authio.models.Token;
 
-import com.example.authio.repositories.TokenRepository;
+import com.example.authio.models.Token;
 
 public class LoginFragmentViewModel extends AuthFragmentViewModel {
 
