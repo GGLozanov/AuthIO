@@ -15,8 +15,10 @@ import android.view.ViewGroup;
 
 import com.example.authio.R;
 import com.example.authio.utils.PrefConfig;
+import com.example.authio.utils.TokenUtils;
 import com.example.authio.viewmodels.LoginFragmentViewModel;
 import com.example.authio.api.OnAuthStateChanged;
+import com.example.authio.views.activities.AuthActivity;
 import com.example.authio.views.activities.MainActivity;
 
 
@@ -37,7 +39,6 @@ public class LoginFragment extends AuthFragment {
     public LoginFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -78,12 +79,16 @@ public class LoginFragment extends AuthFragment {
                     if(token != null) {
                         PrefConfig prefConfig;
 
-                        if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
+                        if((prefConfig = AuthActivity.PREF_CONFIG_REFERENCE.get()) != null) {
                             String responseCode = token.getResponse();
 
                             if(responseCode.equals("ok")) {
-                                prefConfig.writeToken(token.getJWT());
+                                String jwt = token.getJWT();
+
+                                prefConfig.writeToken(jwt);
                                 prefConfig.writeRefreshToken(token.getRefreshJWT());
+
+                                prefConfig.writeAuthUserId(TokenUtils.getTokenUserIdFromPayload(jwt));
 
                                 onLoginFormActivity.performAuthChange(
                                         null // pass in empty user and get in WelcomeFragment

@@ -26,11 +26,13 @@ import android.widget.ImageView;
 
 import com.example.authio.R;
 import com.example.authio.utils.PrefConfig;
+import com.example.authio.utils.TokenUtils;
 import com.example.authio.viewmodels.RegisterFragmentViewModel;
 import com.example.authio.models.Image;
 import com.example.authio.models.User;
 import com.example.authio.api.OnAuthStateChanged;
 import com.example.authio.utils.ImageUtils;
+import com.example.authio.views.activities.AuthActivity;
 import com.example.authio.views.activities.MainActivity;
 
 import java.io.IOException;
@@ -145,14 +147,17 @@ public class RegisterFragment extends AuthFragment {
                     if(token != null) {
                         PrefConfig prefConfig;
 
-                        if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
+                        if((prefConfig = AuthActivity.PREF_CONFIG_REFERENCE.get()) != null) {
                             String responseCode = token.getResponse();
 
                             if(responseCode.equals("ok")) {
-                                prefConfig.writeToken(token.getJWT()); // write & save token
+                                String jwt = token.getJWT();
+
+                                prefConfig.writeToken(jwt); // write & save token
                                 prefConfig.writeRefreshToken(token.getRefreshJWT()); // write & save refresh token
 
-                                Integer userId = token.getUserId();
+                                int userId = TokenUtils.getTokenUserIdFromPayload(jwt);
+                                prefConfig.writeAuthUserId(userId);
 
                                 uploadImageAndAuth(new User(
                                         userId,
@@ -189,7 +194,7 @@ public class RegisterFragment extends AuthFragment {
                 if(response != null) {
                     PrefConfig prefConfig;
 
-                    if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
+                    if((prefConfig = AuthActivity.PREF_CONFIG_REFERENCE.get()) != null) {
                         String responseCode = response.getResponse();
 
                         if(responseCode.equals("Image Uploaded")) {
