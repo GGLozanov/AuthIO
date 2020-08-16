@@ -27,7 +27,8 @@ public class NetworkUtils {
      * @throws IOException - if the errorBody cannot be converted to a string
      * @throws ResponseSuccessfulException - if the given response is actually successful instead of failed (no errorBody)
      */
-    public static Map<String, Object> extractFieldsFromResponseErrorBody(Response response, List<String> fields) throws JSONException, IOException, ResponseSuccessfulException {
+    public static<T> Map<String, Object> extractFieldsFromResponseErrorBody(Response<T> response, List<String> fields)
+            throws JSONException, IOException, ResponseSuccessfulException {
         if(response.isSuccessful()) {
             throw new ResponseSuccessfulException();
         }
@@ -54,7 +55,8 @@ public class NetworkUtils {
      * @throws IOException - if the errorBody cannot be converted to a string
      * @throws ResponseSuccessfulException - if the given response is actually successful instead of failed (no errorBody)
      */
-    public static String extractResponseFromResponseErrorBody(Response response, String responseField) throws JSONException, IOException, ResponseSuccessfulException {
+    public static<T> String extractResponseFromResponseErrorBody(Response<T> response, String responseField)
+            throws JSONException, IOException, ResponseSuccessfulException {
         return (String) extractFieldsFromResponseErrorBody(response, Collections.singletonList(responseField))
                 .get(responseField);
     }

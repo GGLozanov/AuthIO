@@ -2,13 +2,8 @@ package com.example.authio.utils;
 
 import android.graphics.Bitmap;
 import android.util.Base64;
-import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 public class ImageUtils {
     /**
