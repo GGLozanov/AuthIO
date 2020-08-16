@@ -1,26 +1,13 @@
 package com.example.authio.repositories;
 
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.Looper;
-import android.util.Log;
 
-import androidx.core.os.HandlerCompat;
 import androidx.lifecycle.MutableLiveData;
 
 import com.example.authio.api.APIClient;
 import com.example.authio.models.Image;
 import com.example.authio.models.Model;
 import com.example.authio.utils.ImageDownloader;
-import com.example.authio.views.activities.MainActivity;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.concurrent.atomic.AtomicReference;
-
-import android.os.Handler;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -37,6 +24,11 @@ public class ImageRepository extends Repository<Image> { // designed to make an 
         return instance;
     }
 
+    /**
+     * Uploads a base64 encoded image to the server
+     * @param image - Image model to be uploaded to the server
+     * @return - MutableLiveData instance of the Model class (containing just a response) from the server
+     */
     public MutableLiveData<Model> uploadImage(Image image) {
         if(image == null) {
             throw new IllegalArgumentException();
@@ -72,8 +64,12 @@ public class ImageRepository extends Repository<Image> { // designed to make an 
         return mModel;
     }
 
-    // downloads the image asynchronously and returns the livedata reference used in the UI
-    // (updates notifiers when async call completes)
+    /**
+     * downloads the image asynchronously and returns the livedata reference used in the UI
+     * (updates notifiers when async call completes)
+     * @param userId - given user's id (directly correlated to the title of their image)
+     * @return - MutableLiveData instance of image bitmap set to the result from the ImageDownloader AsyncTask
+     */
     public MutableLiveData<Bitmap> downloadImage(Integer userId) {
         MutableLiveData<Bitmap> mBitmap = new MutableLiveData<>();
 

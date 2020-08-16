@@ -26,6 +26,14 @@ public class TokenRepository extends Repository<Token> { // designed to make an 
         return instance;
     }
 
+    /**
+     * Retrieves JWT on user register with email, username, password, and description
+     * @param email - auth user's email
+     * @param username - auth user's username
+     * @param password - auth user's password
+     * @param description - auth user's description
+     * @return MutableLiveData instance with the retrieved JWT
+     */
     public MutableLiveData<Token> getTokenOnRegister(String email, String username, String password, String description) {
         Call<Token> authResult = API_OPERATIONS
                 .performRegistration(
@@ -69,6 +77,12 @@ public class TokenRepository extends Repository<Token> { // designed to make an 
         return mToken;
     }
 
+    /**
+     * Retrieves JWT on user login with email and password
+     * @param email - auth user's email
+     * @param password - auth user's password
+     * @return - MutableLiveData instance with the retrieved JWT
+     */
     public MutableLiveData<Token> getTokenOnLogin(String email, String password) {
         Call<Token> authResult = API_OPERATIONS
                 .performLogin(

@@ -1,6 +1,5 @@
 package com.example.authio.models;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.google.gson.annotations.Expose;
@@ -18,11 +17,6 @@ public class Token extends Model {
     @Nullable
     String refresh_jwt; // may be null (in refresh token request)
 
-    @SerializedName("userId")
-    @Expose
-    @Nullable
-    Integer userId; // may be null (in login & refresh token requests)
-
     /**
      *
      * @param jwt - JWT token received by successful authentication; used for accessing secure endpoints
@@ -34,7 +28,6 @@ public class Token extends Model {
         super(response);
         this.jwt = jwt;
         this.refresh_jwt = refresh_jwt;
-        this.userId = userId;
     }
 
     /**
@@ -57,7 +50,4 @@ public class Token extends Model {
         return refresh_jwt;
     }
 
-    public Integer getUserId() {
-        return userId;
-    }
 }
