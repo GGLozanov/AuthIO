@@ -6,6 +6,25 @@
     android:layout_height="match_parent"
     tools:context=".views.activities.MainActivity">
 
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_nav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorPrimaryDark"
+        android:paddingLeft="10dp"
+        android:paddingRight="10dp"
+        app:elevation="0dp"
+        app:itemBackground="@color/colorPrimaryDark"
+        app:itemIconTint="@color/white"
+        app:itemTextAppearanceActive="@style/BottomNavigationItemActiveTextAppearance"
+        app:itemTextAppearanceInactive="@style/BottomNavigationItemInactiveTextAppearance"
+        app:itemTextColor="@color/white"
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:menu="@menu/menu_bottom_nav" />
+
     <FrameLayout
         android:id="@+id/fragment_container"
         android:layout_width="match_parent"
@@ -15,6 +34,10 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/view_pager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
     </FrameLayout>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

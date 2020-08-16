@@ -16,27 +16,27 @@ import android.widget.Button;
 import android.widget.ImageView;
 
 import com.example.authio.R;
-import com.example.authio.databinding.FragmentWelcomeBinding;
+import com.example.authio.api.OnAuthStateReset;
+import com.example.authio.databinding.SingleUserBinding;
 import com.example.authio.utils.PrefConfig;
-import com.example.authio.viewmodels.WelcomeFragmentViewModel;
+import com.example.authio.viewmodels.ProfileFragmentViewModel;
 import com.example.authio.views.activities.MainActivity;
-import com.example.authio.api.OnAuthStateChanged;
 import com.example.authio.models.User;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class WelcomeFragment extends Fragment {
-    private OnAuthStateChanged onAuthStateChanged; // listener for performing logout
+public class ProfileFragment extends Fragment {
+    private OnAuthStateReset onAuthStateReset; // listener for performing logout
 
     private PrefConfig prefConfig;
 
     private ImageView profileImage;
     private Button logoutButton;
 
-    private WelcomeFragmentViewModel viewModel;
+    private ProfileFragmentViewModel viewModel;
 
-    public WelcomeFragment() {
+    public ProfileFragment() {
         // Required empty public constructor
     }
 
@@ -45,11 +45,11 @@ public class WelcomeFragment extends Fragment {
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         viewModel = new ViewModelProvider(requireActivity())
-                .get(WelcomeFragmentViewModel.class);
+                .get(ProfileFragmentViewModel.class);
         viewModel.init();
 
-        FragmentWelcomeBinding binding = DataBindingUtil.inflate(
-                inflater, R.layout.fragment_welcome, container, false);
+        SingleUserBinding binding = DataBindingUtil.inflate(
+                inflater, R.layout.fragment_profile, container, false);
 
         View view = binding.getRoot();
             // always inflate this layout instead of the default one
@@ -62,7 +62,7 @@ public class WelcomeFragment extends Fragment {
         profileImage = view.findViewById(R.id.profile_image);
 
         logoutButton = view.findViewById(R.id.logout_button);
-        logoutButton.setOnClickListener((v) -> onAuthStateChanged.performAuthReset());
+        logoutButton.setOnClickListener((v) -> onAuthStateReset.performAuthReset());
 
         if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
             Bundle args = getArguments();
@@ -77,7 +77,7 @@ public class WelcomeFragment extends Fragment {
             }
         } else {
             Log.e("No reference", "Found no reference to sharedpreferences in WelcomeFragment.");
-            onAuthStateChanged.performAuthReset();
+            onAuthStateReset.performAuthReset();
         }
 
         return view;
@@ -87,7 +87,7 @@ public class WelcomeFragment extends Fragment {
     public void onAttach(Context context) {
         super.onAttach(context);
         Activity activity = (Activity) context;
-        onAuthStateChanged = (OnAuthStateChanged) activity;
+        onAuthStateReset = (OnAuthStateReset) activity;
     }
 
     private void handleObservedUser(User user) {
@@ -99,7 +99,7 @@ public class WelcomeFragment extends Fragment {
                         .observe(this, (bitmap) ->
                                 profileImage.setImageBitmap(bitmap));
             } else if(responseCode.equals("Reauth")) {
-                onAuthStateChanged.performAuthReset();
+                onAuthStateReset.performAuthReset();
             } else if(responseCode.contains("Failed: ")) {
                 displayErrorAndReauth(responseCode.split("Failed: ")[0]);
             }
@@ -110,6 +110,6 @@ public class WelcomeFragment extends Fragment {
 
     private void displayErrorAndReauth(String error) {
         prefConfig.displayToast(error);
-        onAuthStateChanged.performAuthReset(); // logout upon failure
+        onAuthStateReset.performAuthReset(); // logout upon failure
     }
 }

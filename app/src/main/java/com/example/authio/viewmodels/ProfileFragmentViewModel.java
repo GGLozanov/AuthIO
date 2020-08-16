@@ -10,9 +10,10 @@ import com.example.authio.models.User;
 import com.example.authio.repositories.ImageRepository;
 import com.example.authio.repositories.UserRepository;
 
-import java.io.InputStream;
-
-public class WelcomeFragmentViewModel extends ViewModel {
+/**
+ * ProfileFragment ViewModel which can be used to bind all types of cards for single_user layout
+ */
+public class ProfileFragmentViewModel extends ViewModel {
     private UserRepository userRepository;
     private MutableLiveData<User> mUser;
 

@@ -24,4 +24,7 @@
     <string name="register">Register</string>
     <string name="login">Login</string>
     <string name="logout">Logout</string>
+
+    <string name="bn_view_users_title">View users</string> <!--bn = bottom nav-->
+    <string name="bn_view_self_title">View self</string>
 </resources>
