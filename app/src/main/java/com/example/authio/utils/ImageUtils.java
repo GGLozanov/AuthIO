@@ -17,7 +17,6 @@ public class ImageUtils {
         // compress bitmap to JPEG w/ best quality possible and pass it into the ByteArrayOutputStream
 
         byte[] imageByte = byteArrayOutputStream.toByteArray();
-        return Base64.encodeToString(imageByte, Base64.DEFAULT);
-        // encode byte array to string in Base64 w/ default_img flags
+        return Base64.encodeToString(imageByte, Base64.DEFAULT); // encode byte array to string in Base64 w/ default_img flags
     }
 }

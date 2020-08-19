@@ -37,6 +37,8 @@ public class AuthActivity extends BaseActivity implements
             if(prefConfig.readLoginStatus()) {
                 // auth'd
                 Intent mainActivityI = new Intent(this, MainActivity.class);
+                mainActivityI.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+
                 startActivity(mainActivityI);
                 // add the MainActivity (which starts the Welcome fragment) to the task stack
             } else {
@@ -52,12 +54,13 @@ public class AuthActivity extends BaseActivity implements
         prefConfig.writeLoginStatus(true);
 
         Bundle args = new Bundle();
-        args.putParcelable("user", user);
+        args.putParcelable("user", user); // pass the user through bundle (key-value) args...
 
-        ProfileFragment profileFragment = new ProfileFragment();
-        profileFragment.setArguments(args); // pass the user through bundle (key-value) args...
+        Intent mainActivityI = new Intent(this, MainActivity.class);
+        mainActivityI.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NO_ANIMATION);
+        mainActivityI.putExtras(args);
 
-        replaceCurrentFragment(profileFragment);
+        startActivity(mainActivityI);
     }
 
     @Override

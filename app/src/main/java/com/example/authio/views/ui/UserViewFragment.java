@@ -19,6 +19,7 @@ import com.example.authio.utils.PrefConfig;
 import com.example.authio.viewmodels.UserViewFragmentViewModel;
 import com.example.authio.views.activities.MainActivity;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -43,7 +44,6 @@ public class UserViewFragment extends Fragment {
         userViewFragmentViewModel.init();
 
         usersList = view.findViewById(R.id.users_list);
-        usersList.setAdapter(new UserListViewAdapter(getContext(), R.layout.single_user, null));
 
         PrefConfig prefConfig;
         if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
@@ -52,8 +52,13 @@ public class UserViewFragment extends Fragment {
                     prefConfig.readAuthUserId())
                 .observe(this, (users) -> {
                     if(users != null) {
-                        ((UserListViewAdapter) usersList.getAdapter())
-                                .setUsers(users);
+                        UserListViewAdapter userListViewAdapter;
+                        if((userListViewAdapter = (UserListViewAdapter) usersList.getAdapter()) == null) {
+                            usersList.setAdapter(new UserListViewAdapter(getContext(), R.layout.single_user, users));
+                        } else {
+                            userListViewAdapter
+                                    .setUsers(users);
+                        }
                     } // TODO: Add some sort of error handling here (and some way to specify errors apart from null)
                 });
 

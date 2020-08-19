@@ -52,7 +52,11 @@ public class PrefConfig {
     public void writeAuthUserId(Integer id) {
         SharedPreferences.Editor editor = sharedPreferences.edit();
 
-        editor.putInt(context.getString(R.string.pref_id), id).apply();
+        if(id == null) {
+            editor.remove(context.getString(R.string.pref_id)).apply();
+        } else {
+            editor.putInt(context.getString(R.string.pref_id), id).apply();
+        }
     }
 
     public void displayToast(String message) {

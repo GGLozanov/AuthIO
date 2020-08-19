@@ -1,10 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center">
+    xmlns:tools="http://schemas.android.com/tools">
 
     <!--FIXME: fix this cheaty architecture and use only one variable
         FIXME (while keeping LiveData support from ViewModel and passing in immutable user instance for reading)-->
@@ -25,9 +22,7 @@
         android:background="@drawable/round_container"
         android:gravity="center"
         android:orientation="vertical"
-        android:paddingLeft="5dp"
-        android:paddingRight="5dp"
-        android:paddingBottom="15dp">
+        android:padding="15dp">
 
         <TextView
             android:id="@+id/username_text"
@@ -52,7 +47,6 @@
             android:visibility="visible"
             app:srcCompat="@drawable/default_img"
             tools:src="@drawable/default_img"
-            tools:srcCompat="@drawable/default_img"
             tools:visibility="visible" />
 
         <TextView
@@ -83,8 +77,8 @@
             android:id="@+id/logout_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
             android:background="@drawable/round_button"
+            android:drawableStart="@drawable/ic_exit_to_app_white_24dp"
             android:drawableLeft="@drawable/ic_exit_to_app_white_24dp"
             android:padding="10dp"
             android:text="@string/logout"

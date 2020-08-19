@@ -35,12 +35,12 @@ public class UserListViewAdapter extends ArrayAdapter<User> {
         return users.get(position).hashCode();
     }
 
+    /**
+     * Credit to @sergi from https://stackoverflow.com/questions/33943717/android-data-binding-with-custom-adapter
+     * for the implementation of data-binding within this method using convertView's tag to assign data binding instance
+     */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        /**
-         * Credit to @sergi from https://stackoverflow.com/questions/33943717/android-data-binding-with-custom-adapter
-         * for the implementation of data-binding within this method using convertView's tag to assign data binding instance
-         */
         SingleUserBinding singleUserBinding;
 
         if(convertView == null)  {
@@ -61,11 +61,16 @@ public class UserListViewAdapter extends ArrayAdapter<User> {
             singleUserBinding = (SingleUserBinding) convertView.getTag();
         }
 
-        User user = getItem(position);
+        if(users.size() > 0 && position < users.size()) {
+            User user = getItem(position);
 
-        singleUserBinding.setImmutableUser(user);
+            singleUserBinding.setImmutableUser(user);
+        }
 
         convertView.setTag(singleUserBinding);
+
+        convertView.findViewById(R.id.logout_button)
+                .setVisibility(View.GONE); // disable logout button
 
         return convertView;
     }

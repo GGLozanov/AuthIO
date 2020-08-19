@@ -38,7 +38,7 @@ public class ImageDownloader extends AsyncTask<String, Integer, Bitmap> {
 
         InputStream content;
 
-        // runs getContent() asynchronously in the bounds of the AsyncTask
+        // runs getContent() asynchronously within the bounds of the AsyncTask
         try {
             content = (InputStream) url.getContent(); // get image displayed
         } catch (IOException e) {

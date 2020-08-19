@@ -49,7 +49,7 @@ public class ProfileFragment extends Fragment {
         viewModel.init();
 
         SingleUserBinding binding = DataBindingUtil.inflate(
-                inflater, R.layout.fragment_profile, container, false);
+                inflater, R.layout.single_user, container, false);
 
         View view = binding.getRoot();
             // always inflate this layout instead of the default one

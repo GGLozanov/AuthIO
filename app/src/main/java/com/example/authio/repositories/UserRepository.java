@@ -180,7 +180,7 @@ public class UserRepository extends Repository<User> { // designed to make an AP
             public void onResponse(Call<Map<String, User>> call, Response<Map<String, User>> response) {
                 Map<String, User> idUsers;
                 if(response.isSuccessful() && (idUsers = response.body()) != null) {
-                    mUsers.setValue((List) idUsers.values());
+                    mUsers.setValue(new ArrayList<>(idUsers.values()));
                     return;
                 }
 

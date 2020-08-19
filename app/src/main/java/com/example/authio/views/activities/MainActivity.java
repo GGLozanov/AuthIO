@@ -33,6 +33,8 @@ public class MainActivity extends BaseActivity implements OnAuthStateReset,
         setContentView(R.layout.activity_main);
 
         bottomNavigationView = findViewById(R.id.bottom_nav);
+        bottomNavigationView.setOnNavigationItemSelectedListener(this);
+
         viewPager = findViewById(R.id.view_pager);
 
         viewPager.setOffscreenPageLimit(2); // 2 pages max with saved state in-between
@@ -50,8 +52,14 @@ public class MainActivity extends BaseActivity implements OnAuthStateReset,
                 return;
             }
 
-            fragmentPagerAdapter = new FragmentPagerAdapter(getSupportFragmentManager());
-            fragmentPagerAdapter.addFragment(new ProfileFragment());
+            fragmentPagerAdapter = new FragmentPagerAdapter(getSupportFragmentManager(), 0);
+
+            Bundle bundle = getIntent().getExtras();
+
+            ProfileFragment profileFragment = new ProfileFragment();
+            profileFragment.setArguments(bundle); // contains user instance; set the intent extras as fragment args
+
+            fragmentPagerAdapter.addFragment(profileFragment);
             fragmentPagerAdapter.addFragment(new UserViewFragment());
 
             viewPager.setAdapter(fragmentPagerAdapter);
@@ -77,7 +85,6 @@ public class MainActivity extends BaseActivity implements OnAuthStateReset,
         currentItem = bottomNavMenu.getItem(position);
 
         currentItem.setChecked(true);
-        // replaceCurrentFragment(fragmentPagerAdapter.getItem(position));
     }
 
     @Override
@@ -102,6 +109,7 @@ public class MainActivity extends BaseActivity implements OnAuthStateReset,
         prefConfig.writeAuthUserId(null);
 
         Intent authActivityI = new Intent(this, AuthActivity.class);
+        authActivityI.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // don't add the activity to the back stack through this flag
         startActivity(authActivityI);
     }
 
