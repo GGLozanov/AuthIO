@@ -91,10 +91,10 @@ public class MainActivity extends BaseActivity implements OnAuthStateReset,
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         switch(item.getItemId()) {
             case R.id.action_view_self:
-                viewPager.setCurrentItem(1);
+                viewPager.setCurrentItem(0);
                 break;
             case R.id.action_view_users:
-                viewPager.setCurrentItem(0);
+                viewPager.setCurrentItem(1);
                 break;
         }
 
@@ -106,7 +106,6 @@ public class MainActivity extends BaseActivity implements OnAuthStateReset,
         prefConfig.writeLoginStatus(false);
         prefConfig.writeToken(null);
         prefConfig.writeRefreshToken(null);
-        prefConfig.writeAuthUserId(null);
 
         Intent authActivityI = new Intent(this, AuthActivity.class);
         authActivityI.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // don't add the activity to the back stack through this flag
