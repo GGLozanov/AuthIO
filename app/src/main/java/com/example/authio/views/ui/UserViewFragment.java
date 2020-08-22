@@ -48,8 +48,7 @@ public class UserViewFragment extends Fragment {
         PrefConfig prefConfig;
         if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
             userViewFragmentViewModel.getUsers(
-                    prefConfig.readToken(), prefConfig.readRefreshToken(),
-                    prefConfig.readAuthUserId())
+                    prefConfig.readToken(), prefConfig.readRefreshToken())
                 .observe(this, (users) -> {
                     if(users != null) {
                         UserListViewAdapter userListViewAdapter;

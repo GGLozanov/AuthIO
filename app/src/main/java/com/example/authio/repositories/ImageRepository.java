@@ -7,7 +7,6 @@ import androidx.lifecycle.MutableLiveData;
 import com.example.authio.api.APIClient;
 import com.example.authio.models.Image;
 import com.example.authio.models.Model;
-import com.example.authio.utils.ImageDownloader;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -63,22 +62,4 @@ public class ImageRepository extends Repository<Image> { // designed to make an 
 
         return mModel;
     }
-
-    /**
-     * downloads the image asynchronously and returns the livedata reference used in the UI
-     * (updates notifiers when async call completes)
-     * @param userId - given user's id (directly correlated to the title of their image)
-     * @return - MutableLiveData instance of image bitmap set to the result from the ImageDownloader AsyncTask
-     */
-    public MutableLiveData<Bitmap> downloadImage(Integer userId) {
-        MutableLiveData<Bitmap> mBitmap = new MutableLiveData<>();
-
-        new ImageDownloader(mBitmap).execute(APIClient.getBaseURL() +
-                "uploads/" +
-                userId +
-                ".jpg");
-
-        return mBitmap;
-    }
-
 }

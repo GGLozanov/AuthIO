@@ -39,7 +39,7 @@ public interface APIOperations {
      * @param password - auth user's password
      * @return - a Token model containing a JWT and refresh JWT on success and a failed response from the server on failure
      */
-    @GET("api/auth/login.php") // send a GET request to receive the result of this php script
+    @GET("api/auth/login.php")
     Call<Token> performLogin(
             @Query("email") String email,
             @Query("password") String password
@@ -80,14 +80,12 @@ public interface APIOperations {
 
     /**
      * GET request to fetch all other users apart from the authenticated (auth'd) one
-     * @param token - JWT for the given auth user used to validate requests to secure endpoints
-     * @param id - auth'd user's id (used to exclude from DB fetch)
+     * @param token - JWT for the given auth user used to validate requests to secure endpoints (contains auth user's id)
      * @return - a map of string ids and user models (no string response; if something goes awry, blame it on the user's connection)
      */
     @GET("api/service/get_users.php")
     Call<Map<String, User>> getUsers(
-            @Header("Authorization") String token,
-            @Query("auth_id") int id
+            @Header("Authorization") String token
     );
 
     /*

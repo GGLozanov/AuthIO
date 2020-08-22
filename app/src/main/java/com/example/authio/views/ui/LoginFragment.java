@@ -51,7 +51,8 @@ public class LoginFragment extends AuthFragment {
         viewModel.init();
 
         initAuthFields(view);
-        initListeners((v) -> onLoginFormActivity.performToggleToRegister(), (v) -> performLogin());
+        initListeners((v) -> onLoginFormActivity.performToggleToRegister(),
+                (v) -> performLogin());
 
         return view;
     }
@@ -59,8 +60,7 @@ public class LoginFragment extends AuthFragment {
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        // explicit downcasting
-        Activity activity = (Activity) context;
+        Activity activity = (Activity) context; // explicit downcasting
         onLoginFormActivity = (OnLoginFormActivity) activity;
     }
 
@@ -87,8 +87,6 @@ public class LoginFragment extends AuthFragment {
 
                                 prefConfig.writeToken(jwt);
                                 prefConfig.writeRefreshToken(token.getRefreshJWT());
-
-                                prefConfig.writeAuthUserId(TokenUtils.getTokenUserIdFromPayload(jwt));
 
                                 onLoginFormActivity.performAuthChange(
                                         null // pass in empty user and get in WelcomeFragment

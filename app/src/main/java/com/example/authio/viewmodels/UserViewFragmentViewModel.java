@@ -21,8 +21,8 @@ public class UserViewFragmentViewModel extends ViewModel {
         userRepository = UserRepository.getInstance();
     }
 
-    public LiveData<List<User>> getUsers(String token, String refreshToken, int id) {
-        return mUsers = userRepository.getUsers(token, refreshToken, id);
+    public LiveData<List<User>> getUsers(String token, String refreshToken) {
+        return mUsers = userRepository.getUsers(token, refreshToken);
     }
 
     public void setUsers(MutableLiveData<List<User>> mUsers) {

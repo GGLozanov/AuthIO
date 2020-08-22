@@ -112,9 +112,8 @@ public class UserRepository extends Repository<User> { // designed to make an AP
      * @return - MutableliveData instance with the currently authenticated user
      */
     public MutableLiveData<User> getUser(String token, String refreshToken) {
-        Call<User> userFetchResult = API_OPERATIONS.getUser(
-                token
-        );
+        Call<User> userFetchResult = API_OPERATIONS
+                .getUser(token);
 
         final MutableLiveData<User> mUser = new MutableLiveData<>();
         userFetchResult.enqueue(new Callback<User>() {
@@ -170,9 +169,9 @@ public class UserRepository extends Repository<User> { // designed to make an AP
      * @param refreshToken - refresh JWT used when initial JWT is expired
      * @return - MutableliveData instance with a map containing a relation IDs-User models (per JSON response)
      */
-    public MutableLiveData<List<User>> getUsers(String token, String refreshToken, int id) {
+    public MutableLiveData<List<User>> getUsers(String token, String refreshToken) {
         Call<Map<String, User>> getUsersResult = API_OPERATIONS
-                .getUsers(token, id);
+                .getUsers(token);
 
         MutableLiveData<List<User>> mUsers = new MutableLiveData<>();
         getUsersResult.enqueue(new Callback<Map<String, User>>() {
@@ -190,7 +189,7 @@ public class UserRepository extends Repository<User> { // designed to make an AP
                         public void onResponse(Call<Token> call, Response<Token> response) {
                             String jwtToken;
                             if((jwtToken = getTokenFromRefreshResponse(response)) != null) {
-                                getUsers(jwtToken, refreshToken, id);
+                                getUsers(jwtToken, refreshToken);
                             } else {
                                 mUsers.setValue(null);
                             }

@@ -17,15 +17,11 @@ public class ProfileFragmentViewModel extends ViewModel {
     private UserRepository userRepository;
     private MutableLiveData<User> mUser;
 
-    private ImageRepository imageRepository;
-    private MutableLiveData<Bitmap> mImageBitmap;
-
     public void init() {
-        if(mUser != null && mImageBitmap != null) {
+        if(mUser != null) {
             return;
         }
 
-        imageRepository = ImageRepository.getInstance();
         userRepository = UserRepository.getInstance();
     }
 
@@ -43,25 +39,5 @@ public class ProfileFragmentViewModel extends ViewModel {
 
     public LiveData<User> getUser() {
         return mUser;
-    }
-
-    public User getUserValue() {
-        return mUser != null ? mUser.getValue() : null;
-    }
-
-    public LiveData<Bitmap> getImageBitmap(Integer userId) {
-        return mImageBitmap = imageRepository.downloadImage(userId);
-    }
-
-    public LiveData<Bitmap> setImageBitmap(Bitmap bitmap) {
-        if(mImageBitmap == null) {
-            mImageBitmap = new MutableLiveData<>();
-        }
-        mImageBitmap.setValue(bitmap);
-        return mImageBitmap;
-    }
-
-    public Bitmap getImageBitmapValue() {
-        return mImageBitmap != null ? mImageBitmap.getValue() : null;
     }
 }

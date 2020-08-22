@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 
+import com.bumptech.glide.Glide;
 import com.example.authio.R;
 import com.example.authio.api.OnAuthStateReset;
 import com.example.authio.databinding.SingleUserBinding;
@@ -94,10 +95,11 @@ public class ProfileFragment extends Fragment {
         if(user != null) {
             String responseCode = user.getResponse();
 
-            if(responseCode.equals("ok")) {
-                viewModel.getImageBitmap(user.getId())
-                        .observe(this, (bitmap) ->
-                                profileImage.setImageBitmap(bitmap));
+            String photoUrl;
+            if(responseCode.equals("ok") && (photoUrl = user.getPhotoUrl()) != null) {
+                Glide.with(this)
+                        .load(photoUrl)
+                        .into(profileImage); // Glide makes image loading and caching a dream - no AsyncTasks or Lrucaches here!
             } else if(responseCode.equals("Reauth")) {
                 onAuthStateReset.performAuthReset();
             } else if(responseCode.contains("Failed: ")) {

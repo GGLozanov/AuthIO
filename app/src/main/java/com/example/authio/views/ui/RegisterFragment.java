@@ -25,6 +25,7 @@ import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.example.authio.R;
+import com.example.authio.api.APIClient;
 import com.example.authio.utils.PrefConfig;
 import com.example.authio.utils.TokenUtils;
 import com.example.authio.viewmodels.RegisterFragmentViewModel;
@@ -157,15 +158,32 @@ public class RegisterFragment extends AuthFragment {
                                 prefConfig.writeRefreshToken(token.getRefreshJWT()); // write & save refresh token
 
                                 int userId = TokenUtils.getTokenUserIdFromPayload(jwt);
-                                prefConfig.writeAuthUserId(userId);
 
-                                uploadImageAndAuth(new User(
-                                        userId,
-                                        responseCode,
-                                        username,
-                                        description,
-                                        email
-                                )); // go on to upload the image if the registration was successful
+                                // don't upload picture if it's the default
+                                if(profileImage.getDrawable() ==
+                                        ContextCompat.getDrawable(getContext(), R.drawable.default_img)) {
+                                    uploadImageAndAuth(new User(
+                                            userId,
+                                            responseCode,
+                                            username,
+                                            description,
+                                            email,
+                                            APIClient.getBaseURL() +
+                                                    "uploads/" +
+                                                    userId +
+                                                    ".jpg"
+                                    )); // go on to upload the image if the registration was successful
+                                } else {
+                                    onRegisterFormActivity.performAuthChange(new User(
+                                            userId,
+                                            responseCode,
+                                            username,
+                                            description,
+                                            email
+                                        )
+                                    ); // switch to new activity if no image left to upload
+                                }
+
                             } else if(responseCode.equals("exists")) {
                                 prefConfig.displayToast("User already exists!");
                             } else if(responseCode.equals("failed")) {
@@ -182,11 +200,6 @@ public class RegisterFragment extends AuthFragment {
     }
 
     private void uploadImageAndAuth(User user) {
-        if(profileImage.getDrawable() ==
-             ContextCompat.getDrawable(getContext(), R.drawable.default_img)) {
-            return; // don't upload picture if it's the default
-        }
-
         ((RegisterFragmentViewModel) viewModel).uploadUserImage(
                 new Image(user.getId().toString(), null, ImageUtils.encodeImage(bitmap)))
                 .observe(this, (response) -> {
@@ -208,7 +221,8 @@ public class RegisterFragment extends AuthFragment {
 
                         onRegisterFormActivity.performAuthChange(
                                 user
-                        ); // switch to welcome fragment after image is received (uploaded or failed)
+                        ); // switch to new activity after image is received (uploaded or failed)
+                        // can't extract auth trigger from here because it's inside closure :(
                     }
                 }
         });

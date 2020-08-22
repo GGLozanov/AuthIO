@@ -34,15 +34,39 @@ public class User extends Model implements Parcelable {
     @Nullable
     private String email;
 
+    @SerializedName("photo_url")
+    @Expose
+    @Nullable
+    private String photoUrl;
+
     /**
-     *
+     * Constructor made for when user has an image (photoUrl)
+     * @param id - Given user's id
+     * @param response - Custom API status message received from call
+     * @param username - Given user's username
+     * @param description - Given user's description
+     * @param email - Given user's email
+     * @param photoUrl - Given user's photoUrl
+     */
+    public User(@Nullable Integer id, String response, @Nullable String username,
+                @Nullable String description, @Nullable String email, @Nullable String photoUrl) {
+        super(response);
+        this.id = id;
+        this.username = username;
+        this.description = description;
+        this.email = email;
+        this.photoUrl = photoUrl;
+    }
+
+    /**
+     * Constructor made for when user has no image (no photoUrl)
      * @param id - Given user's id
      * @param response - Custom API status message received from call
      * @param username - Given user's username
      * @param description - Given user's description
      * @param email - Given user's email
      */
-    public User(@Nullable Integer id, String response, @Nullable String username, @Nullable String description, @Nullable String email) {
+    public User( @Nullable Integer id, String response, @Nullable String username, @Nullable String description, @Nullable String email) {
         super(response);
         this.id = id;
         this.username = username;
@@ -68,6 +92,7 @@ public class User extends Model implements Parcelable {
         this.username = in.readString();
         this.description = in.readString();
         this.email = in.readString();
+        this.photoUrl = in.readString();
     }
 
     public Integer getId() { return id; }
@@ -83,6 +108,8 @@ public class User extends Model implements Parcelable {
     public String getEmail() {
         return email;
     }
+
+    public String getPhotoUrl() { return photoUrl; }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() { // creator used to convert parcelables to model
         public User createFromParcel(Parcel in) {
@@ -119,6 +146,10 @@ public class User extends Model implements Parcelable {
 
         if(email != null) {
             dest.writeString(email);
+        }
+
+        if(photoUrl != null) {
+            dest.writeString(photoUrl);
         }
     }
 
