@@ -1,25 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_height="match_parent"
     android:layout_width="match_parent" >
 
     <ScrollView
-        android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:visibility="visible" >
+        android:layout_height="match_parent"
+        android:visibility="visible">
 
-        <FrameLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            tools:context=".views.ui.ProfileFragment" >
-
-            <!-- TODO: Update blank fragment layout -->
-
-            <include
-                layout="@layout/single_user"
-                android:gravity="center" />
-
-        </FrameLayout>
+        <include
+            layout="@layout/single_user"
+            android:gravity="center" />
     </ScrollView>
-</FrameLayout>
+</RelativeLayout>

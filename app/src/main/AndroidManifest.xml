@@ -16,7 +16,9 @@
         android:usesCleartextTraffic="true"
         tools:targetApi="m">
         <!-- Gives cleartext perms for web server interaction -->
-        <activity android:name=".views.activities.AuthActivity">
+        <activity android:name=".views.activities.AuthActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
