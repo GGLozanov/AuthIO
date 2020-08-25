@@ -3,12 +3,15 @@ package com.example.authio.views.ui;
 
 import android.app.Activity;
 import android.content.Context;
+import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.util.Log;
+import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +23,8 @@ import com.example.authio.viewmodels.LoginFragmentViewModel;
 import com.example.authio.api.OnAuthStateChanged;
 import com.example.authio.views.activities.AuthActivity;
 import com.example.authio.views.activities.MainActivity;
+
+import java.util.Objects;
 
 
 /**
@@ -40,6 +45,7 @@ public class LoginFragment extends AuthFragment {
         // Required empty public constructor
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -64,14 +70,18 @@ public class LoginFragment extends AuthFragment {
         onLoginFormActivity = (OnLoginFormActivity) activity;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     public void performLogin() {
-        String email = emailInput.getText().toString(),
-                password = passwordInput.getText().toString();
+        String email = Objects.requireNonNull(emailInput.getText()).toString(),
+                password = Objects.requireNonNull(passwordInput.getText()).toString();
 
-        if(email.isEmpty() || password.isEmpty()) {
-            showErrorMessage("Invalid info in forms!");
+        if(emailInput.isInvalid() | passwordInput.isInvalid()) {
+            showErrorMessage("Invalid info in fields!", emailInput.wasInvalid() ?
+                            "Enter a valid e-mail" : null,
+                    passwordInput.wasInvalid() ? "Enter a password" : null);
             return;
         }
+
         hideErrorMessage();
 
         ((LoginFragmentViewModel) viewModel).getLoginToken(email, password)

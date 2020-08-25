@@ -11,6 +11,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
+import androidx.annotation.RequiresApi;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -34,9 +35,10 @@ import com.example.authio.models.User;
 import com.example.authio.api.OnAuthStateChanged;
 import com.example.authio.utils.ImageUtils;
 import com.example.authio.views.activities.AuthActivity;
-import com.example.authio.views.activities.MainActivity;
+import com.example.authio.views.custom.ErrableEditText;
 
 import java.io.IOException;
+import java.util.Objects;
 
 import static android.app.Activity.RESULT_OK;
 
@@ -49,10 +51,10 @@ public class RegisterFragment extends AuthFragment {
         void performToggleToLogin();
     }
 
-    private static int IMG_REQUEST_CODE = 777; // request code for activities
+    private static int IMG_REQUEST_CODE = 777; // request code for get_image activity (used in callback)
     private Bitmap bitmap; // image represented as a bitmap to be decoded from intent result
 
-    private EditText usernameInput, descriptionInput;
+    private ErrableEditText usernameInput, descriptionInput;
     private ImageView profileImage;
     private OnRegisterFormActivity onRegisterFormActivity;
 
@@ -60,6 +62,7 @@ public class RegisterFragment extends AuthFragment {
         // Required empty public constructor
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -71,10 +74,13 @@ public class RegisterFragment extends AuthFragment {
         viewModel.init();
 
         initAuthFields(view);
-        initListeners((v) -> onRegisterFormActivity.performToggleToLogin(), (v) -> performRegister());
+        initListeners((v) -> onRegisterFormActivity.performToggleToLogin(),
+                (v) -> performRegister());
 
-        usernameInput = view.findViewById(R.id.username_input_field);
-        descriptionInput = view.findViewById(R.id.description_input_field);
+        usernameInput = ((ErrableEditText) view.findViewById(R.id.username_input_field))
+                .withErrorPredicate(String::isEmpty);
+        descriptionInput = ((ErrableEditText) view.findViewById(R.id.description_input_field))
+                .withErrorPredicate(String::isEmpty);
         profileImage = view.findViewById(R.id.profile_image);
 
         profileImage.setOnClickListener((v) -> {
@@ -128,15 +134,27 @@ public class RegisterFragment extends AuthFragment {
         onRegisterFormActivity = (OnRegisterFormActivity) activity;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     private void performRegister() {
-        String email = emailInput.getText().toString(),
-                password = passwordInput.getText().toString(),
-                username = usernameInput.getText().toString(),
-                description = descriptionInput.getText().toString();
+        String email = Objects.requireNonNull(emailInput.getText()).toString(),
+                password = Objects.requireNonNull(passwordInput.getText()).toString(),
+                username = Objects.requireNonNull(usernameInput.getText()).toString(),
+                description = Objects.requireNonNull(descriptionInput.getText()).toString();
 
-        if((email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches())
-                || password.isEmpty() || username.isEmpty() || description.isEmpty()) {
-            showErrorMessage("Invalid info in fields!");
+        if(emailInput.isInvalid() | passwordInput.isInvalid()
+                | usernameInput.isInvalid() | descriptionInput.isInvalid()) { // disable lazy eval; fucks over predicate testing
+            showErrorMessage("Invalid info in fields!", emailInput.wasInvalid() ?
+                            "Enter a valid e-mail" : null,
+                    passwordInput.wasInvalid() ? "Enter a password" : null);
+
+            if(usernameInput.wasInvalid()) {
+                usernameInput.setError("Enter a username");
+            }
+
+            if(descriptionInput.wasInvalid()) {
+                descriptionInput.setError("Enter a description");
+            }
+
             return;
         }
 
@@ -160,30 +178,28 @@ public class RegisterFragment extends AuthFragment {
                                 int userId = TokenUtils.getTokenUserIdFromPayload(jwt);
 
                                 // don't upload picture if it's the default
+                                User user = new User(
+                                        userId,
+                                        responseCode,
+                                        username,
+                                        description,
+                                        email
+                                );
+
                                 if(profileImage.getDrawable() ==
                                         ContextCompat.getDrawable(getContext(), R.drawable.default_img)) {
-                                    uploadImageAndAuth(new User(
-                                            userId,
-                                            responseCode,
-                                            username,
-                                            description,
-                                            email,
-                                            APIClient.getBaseURL() +
-                                                    "uploads/" +
-                                                    userId +
-                                                    ".jpg"
-                                    )); // go on to upload the image if the registration was successful
+                                    user.setPhotoUrl(APIClient.getBaseURL() +
+                                            "uploads/" +
+                                            userId +
+                                            ".jpg");
+                                    uploadImageAndAuth(user); // go on to upload the image if the registration was successful
                                 } else {
-                                    onRegisterFormActivity.performAuthChange(new User(
-                                            userId,
-                                            responseCode,
-                                            username,
-                                            description,
-                                            email
-                                        )
+                                    onRegisterFormActivity.performAuthChange(
+                                            user
                                     ); // switch to new activity if no image left to upload
-                                }
 
+                                    // can't extract auth trigger from if/else block because the other call is inside async callback closure
+                                }
                             } else if(responseCode.equals("exists")) {
                                 prefConfig.displayToast("User already exists!");
                             } else if(responseCode.equals("failed")) {
@@ -222,7 +238,6 @@ public class RegisterFragment extends AuthFragment {
                         onRegisterFormActivity.performAuthChange(
                                 user
                         ); // switch to new activity after image is received (uploaded or failed)
-                        // can't extract auth trigger from here because it's inside closure :(
                     }
                 }
         });

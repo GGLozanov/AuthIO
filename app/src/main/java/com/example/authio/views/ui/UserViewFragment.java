@@ -25,7 +25,7 @@ import java.util.List;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class UserViewFragment extends Fragment {
+public class UserViewFragment extends MainFragment {
 
     private ListView usersList;
 
@@ -45,12 +45,18 @@ public class UserViewFragment extends Fragment {
 
         usersList = view.findViewById(R.id.users_list);
 
-        PrefConfig prefConfig;
         if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
             userViewFragmentViewModel.getUsers(
                     prefConfig.readToken(), prefConfig.readRefreshToken())
                 .observe(this, (users) -> {
                     if(users != null) {
+                        if(users.size() == 1 && users.get(0).getResponse().equals("Reauth")) {
+                            // means failed response - something went wrong
+                            onAuthStateReset.performAuthReset();
+                            prefConfig.displayToast("Your session has expired or something might be wrong. Please login again.");
+                            return;
+                        }
+
                         UserListViewAdapter userListViewAdapter;
                         if((userListViewAdapter = (UserListViewAdapter) usersList.getAdapter()) == null) {
                             usersList.setAdapter(new UserListViewAdapter(getContext(), R.layout.single_user, users));
@@ -58,7 +64,7 @@ public class UserViewFragment extends Fragment {
                             userListViewAdapter
                                     .setUsers(users);
                         }
-                    } // TODO: Add some sort of error handling here (and some way to specify errors apart from null)
+                    }
                 });
 
         } else {

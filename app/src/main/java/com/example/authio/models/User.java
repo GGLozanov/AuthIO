@@ -66,7 +66,8 @@ public class User extends Model implements Parcelable {
      * @param description - Given user's description
      * @param email - Given user's email
      */
-    public User( @Nullable Integer id, String response, @Nullable String username, @Nullable String description, @Nullable String email) {
+    public User(@Nullable Integer id, String response, @Nullable String username,
+                @Nullable String description, @Nullable String email) {
         super(response);
         this.id = id;
         this.username = username;
@@ -110,6 +111,10 @@ public class User extends Model implements Parcelable {
     }
 
     public String getPhotoUrl() { return photoUrl; }
+
+    public void setPhotoUrl(@Nullable String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
 
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() { // creator used to convert parcelables to model
         public User createFromParcel(Parcel in) {

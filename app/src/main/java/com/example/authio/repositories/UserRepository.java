@@ -15,6 +15,8 @@ import org.json.JSONException;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -191,23 +193,31 @@ public class UserRepository extends Repository<User> { // designed to make an AP
                             if((jwtToken = getTokenFromRefreshResponse(response)) != null) {
                                 getUsers(jwtToken, refreshToken);
                             } else {
-                                mUsers.setValue(null);
+                                mUsers.setValue(new ArrayList<>(
+                                        Collections.singletonList(User.asFailed("Reauth"))
+                                ));
                             }
                         }
 
                         @Override
                         public void onFailure(Call<Token> call, Throwable t) {
-                            mUsers.setValue(null);
+                            mUsers.setValue(new ArrayList<>(
+                                    Collections.singletonList(User.asFailed("Reauth"))
+                            ));
                         }
                     });
                 } catch (JSONException | IOException | NetworkUtils.ResponseSuccessfulException | InvalidTokenException e) {
-                    mUsers.setValue(null);
+                    mUsers.setValue(new ArrayList<>(
+                            Collections.singletonList(User.asFailed("Reauth"))
+                    ));
                 }
             }
 
             @Override
             public void onFailure(Call<Map<String, User>> call, Throwable t) {
-                mUsers.setValue(null);
+                mUsers.setValue(new ArrayList<>(
+                        Collections.singletonList(User.asFailed("Reauth"))
+                ));
             }
         });
 

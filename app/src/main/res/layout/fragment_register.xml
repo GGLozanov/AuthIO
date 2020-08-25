@@ -62,7 +62,7 @@
                 android:textStyle="bold"
                 android:visibility="gone" />
 
-            <EditText
+            <com.example.authio.views.custom.ErrableEditText
                 android:id="@+id/email_input_field"
                 style="@style/EditTextTheme"
                 android:layout_width="match_parent"
@@ -74,7 +74,7 @@
                 android:maxLines="2"
                 android:singleLine="true" />
 
-            <EditText
+            <com.example.authio.views.custom.ErrableEditText
                 android:id="@+id/password_input_field"
                 style="@style/EditTextTheme"
                 android:layout_width="match_parent"
@@ -86,7 +86,7 @@
                 android:maxLines="2"
                 android:singleLine="true" />
 
-            <EditText
+            <com.example.authio.views.custom.ErrableEditText
                 android:id="@+id/username_input_field"
                 style="@style/EditTextTheme"
                 android:layout_width="match_parent"
@@ -98,7 +98,7 @@
                 android:maxLines="2"
                 android:singleLine="true" />
 
-            <EditText
+            <com.example.authio.views.custom.ErrableEditText
                 android:id="@+id/description_input_field"
                 style="@style/EditTextTheme"
                 android:layout_width="match_parent"

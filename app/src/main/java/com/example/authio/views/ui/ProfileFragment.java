@@ -27,13 +27,9 @@ import com.example.authio.models.User;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ProfileFragment extends Fragment {
-    private OnAuthStateReset onAuthStateReset; // listener for performing logout
-
-    private PrefConfig prefConfig;
+public class ProfileFragment extends MainFragment {
 
     private ImageView profileImage;
-    private Button logoutButton;
 
     private ProfileFragmentViewModel viewModel;
 
@@ -62,9 +58,6 @@ public class ProfileFragment extends Fragment {
 
         profileImage = view.findViewById(R.id.profile_image);
 
-        logoutButton = view.findViewById(R.id.logout_button);
-        logoutButton.setOnClickListener((v) -> onAuthStateReset.performAuthReset());
-
         if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
             Bundle args = getArguments();
             User passedUser;
@@ -82,13 +75,6 @@ public class ProfileFragment extends Fragment {
         }
 
         return view;
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        Activity activity = (Activity) context;
-        onAuthStateReset = (OnAuthStateReset) activity;
     }
 
     private void handleObservedUser(User user) {

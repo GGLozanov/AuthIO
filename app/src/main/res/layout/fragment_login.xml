@@ -3,19 +3,21 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:visibility="visible"
+    tools:visibility="visible"
     tools:context=".views.ui.LoginFragment">
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_gravity="center|center_horizontal|center_vertical"
+        android:layout_marginBottom="40dp"
         tools:context=".views.ui.LoginFragment">
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginBottom="50dp"
             android:background="@drawable/round_container"
             android:orientation="vertical"
             android:padding="20dp">
@@ -40,23 +42,24 @@
                 android:layout_gravity="center_horizontal"
                 android:gravity="center"
                 android:text="@string/register"
-                android:textColor="#FF0000	"
-                android:textSize="24sp"
+                android:textColor="#FF0000"
+                android:textSize="22sp"
                 android:textStyle="bold"
                 android:visibility="gone" />
 
-            <EditText
+            <com.example.authio.views.custom.ErrableEditText
                 android:id="@+id/email_input_field"
                 style="@style/EditTextTheme"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="5dp"
+                android:layout_marginRight="5dp"
                 android:ems="10"
                 android:hint="@string/email_hint"
                 android:inputType="textEmailAddress"
                 android:maxLines="4" />
 
-            <EditText
+            <com.example.authio.views.custom.ErrableEditText
                 android:id="@+id/password_input_field"
                 style="@style/EditTextTheme"
                 android:layout_width="match_parent"
