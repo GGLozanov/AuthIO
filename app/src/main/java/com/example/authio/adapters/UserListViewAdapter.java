@@ -87,9 +87,6 @@ public class UserListViewAdapter extends ArrayAdapter<User> {
             }
 
             userHolder.singleUserBinding.setImmutableUser(user);
-
-            userCard.findViewById(R.id.logout_button)
-                    .setVisibility(View.GONE); // disable logout button
         }
 
         return userCard;

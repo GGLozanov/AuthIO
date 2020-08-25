@@ -21,6 +21,7 @@
         android:layout_marginBottom="20dp"
         android:background="@drawable/round_container"
         android:gravity="center_horizontal"
+        android:layout_gravity="center"
         android:padding="15dp">
 
         <TextView
@@ -29,7 +30,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="10dp"
-            android:padding="15dp"
+            android:padding="5dp"
             android:text="@{immutableUser.username ?? viewmodel.user.username}"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -49,6 +50,7 @@
             android:layout_marginEnd="15dp"
             android:layout_marginRight="15dp"
             android:cropToPadding="true"
+            android:padding="10dp"
             android:scaleType="centerCrop"
             android:visibility="visible"
             app:layout_constraintBottom_toTopOf="@id/email_text"
@@ -65,11 +67,11 @@
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:gravity="center"
-            android:padding="15dp"
+            android:padding="5dp"
             android:text="@{immutableUser.description ?? viewmodel.user.description}"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@+id/logout_button"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="parent"
             app:layout_constraintStart_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/email_text" />
@@ -79,9 +81,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginBottom="10dp"
-            android:padding="15dp"
+            android:padding="5dp"
             android:text="@{immutableUser.email ?? viewmodel.user.email}"
             android:textSize="18sp"
             android:textStyle="bold"
@@ -90,20 +90,6 @@
             app:layout_constraintStart_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/profile_image" />
 
-        <Button
-            android:id="@+id/logout_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/round_button"
-            android:drawableStart="@drawable/ic_exit_to_app_white_24dp"
-            android:drawableLeft="@drawable/ic_exit_to_app_white_24dp"
-            android:padding="10dp"
-            android:text="@string/logout"
-            android:textSize="18sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/description_text" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
 </layout>
