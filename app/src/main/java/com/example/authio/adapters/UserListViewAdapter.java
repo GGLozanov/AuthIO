@@ -72,8 +72,11 @@ public class UserListViewAdapter extends ArrayAdapter<User> {
 
                 userCard.setTag(userHolder);
             } else {
-                userHolder = (UserHolder) convertView.getTag();
+                userHolder = (UserHolder) userCard.getTag();
             }
+
+            userCard.findViewById(R.id.confirm_button)
+                    .setVisibility(View.GONE); // remove confirm options button from layout
 
             String photoUrl;
             if(user != null && (photoUrl = user.getPhotoUrl()) != null)  {

@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.os.Bundle;
 
+import androidx.core.os.HandlerCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
@@ -70,7 +71,7 @@ public class ProfileFragment extends MainFragment {
                         .observe(this, this::handleObservedUser); // set the observer for the user fetch livedata method
             }
         } else {
-            Log.e("No reference", "Found no reference to sharedpreferences in WelcomeFragment.");
+            Log.e("ProfileFragment", "Found no reference to sharedpreferences in WelcomeFragment.");
             onAuthStateReset.performAuthReset();
         }
 
@@ -92,7 +93,7 @@ public class ProfileFragment extends MainFragment {
                 displayErrorAndReauth(responseCode.split("Failed: ")[0]);
             }
         } else {
-            Log.w("WelcomeFragment", "No user found to be observed");
+            Log.w("ProfileFragment", "No user found to be observed");
         }
     }
 

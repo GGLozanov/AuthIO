@@ -47,7 +47,7 @@ public interface APIOperations {
 
     /**
      * GET request to retrieve a new token using the refresh token
-     * @param refreshJWT
+     * @param refreshJWT - refresh JWT with a long expiry date used to retrieve new user JWTs
      * @return - a Token model containing a new JWT on success and a failed response from the server on failure
      */
     @GET("api/auth/refresh_token.php")
@@ -66,15 +66,15 @@ public interface APIOperations {
     );
 
     /**
-     * FormUrlEncoded POST request to upload a given image with a given title to the server
-     * @param title - image's title as a string
+     * FormUrlEncoded POST request to upload a given image with a given title to the server (image's title is user's id garnered from token)
+     * @param token - JWT for the given auth user used to validate requests to secure endpoints
      * @param image - the Base64 image
      * @return - a Model containing a response from the server based on success or failure
      */
     @POST("api/service/image.php")
     @FormUrlEncoded
     Call<Model> performImageUpload(
-            @Field("title") String title, // title is user id (change to integer client and server side)
+            @Header("Authorization") String token, // title is user id (change to integer client and server side)
             @Field("image") String image
     );
 

@@ -1,6 +1,7 @@
 package com.example.authio.repositories;
 
 import android.graphics.Bitmap;
+import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
 
@@ -28,14 +29,16 @@ public class ImageRepository extends Repository<Image> { // designed to make an 
      * @param image - Image model to be uploaded to the server
      * @return - MutableLiveData instance of the Model class (containing just a response) from the server
      */
-    public MutableLiveData<Model> uploadImage(Image image) {
+    public MutableLiveData<Model> uploadImage(String token, Image image) {
         if(image == null) {
             throw new IllegalArgumentException();
         }
 
+        Log.i("ImageRepository", "uploadImage —> Calling for image result from (upload) image endpoint");
+
         Call<Model> imageUploadResult = API_OPERATIONS
                 .performImageUpload(
-                        image.getTitle(),
+                        token,
                         image.getImage()
                 );
 
@@ -45,14 +48,17 @@ public class ImageRepository extends Repository<Image> { // designed to make an 
             public void onResponse(Call<Model> call, Response<Model> response) {
                 Model model;
                 if(response.isSuccessful() && (model = response.body()) != null) {
+                    Log.i("ImageRepository", "uploadImage —> Image upload was successful.");
                     mModel.setValue(model); // will notify observers once set from async call again here
                 } else {
+                    Log.i("ImageRepository", "uploadImage —> Image upload was not successful.");
                     mModel.setValue(Model.asFailed(response.message()));
                 }
             }
 
             @Override
             public void onFailure(Call<Model> call, Throwable t) {
+                Log.w("ImageRepository", "uploadImage —> Internal server error during image upload.");
                 mModel.setValue(Model.asFailed(t.getMessage()));
             }
         });

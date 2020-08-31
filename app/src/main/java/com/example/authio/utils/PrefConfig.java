@@ -45,20 +45,6 @@ public class PrefConfig {
         return sharedPreferences.getString(context.getString(R.string.pref_refresh_token), "invalid");
     }
 
-    public int readAuthUserId() {
-        return sharedPreferences.getInt(context.getString(R.string.pref_id), -1);
-    }
-
-    public void writeAuthUserId(Integer id) {
-        SharedPreferences.Editor editor = sharedPreferences.edit();
-
-        if(id == null) {
-            editor.remove(context.getString(R.string.pref_id)).apply();
-        } else {
-            editor.putInt(context.getString(R.string.pref_id), id).apply();
-        }
-    }
-
     public void displayToast(String message) {
         Toast.makeText(context, message, Toast.LENGTH_LONG).show();
     }

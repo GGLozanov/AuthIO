@@ -50,7 +50,7 @@ public class UserViewFragment extends MainFragment {
                     prefConfig.readToken(), prefConfig.readRefreshToken())
                 .observe(this, (users) -> {
                     if(users != null) {
-                        if(users.size() == 1 && users.get(0).getResponse().equals("Reauth")) {
+                        if(users.get(0).getResponse().equals("Reauth")) {
                             // means failed response - something went wrong
                             onAuthStateReset.performAuthReset();
                             prefConfig.displayToast("Your session has expired or something might be wrong. Please login again.");
@@ -68,7 +68,7 @@ public class UserViewFragment extends MainFragment {
                 });
 
         } else {
-            Log.e("No reference", "Found no reference to sharedpreferences in UserViewFragment.");
+            Log.e("UserViewFragment", "Found no reference to sharedpreferences in UserViewFragment.");
         }
 
         return view;

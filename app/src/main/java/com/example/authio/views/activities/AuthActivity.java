@@ -4,6 +4,7 @@ import androidx.annotation.Nullable;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 
 import com.example.authio.R;
 import com.example.authio.models.User;
@@ -16,6 +17,9 @@ import java.lang.ref.WeakReference;
 
 public class AuthActivity extends BaseActivity implements
         LoginFragment.OnLoginFormActivity, RegisterFragment.OnRegisterFormActivity {
+
+    private RegisterFragment registerFragmentInstance; // singletons because they're valid for this state only
+    private LoginFragment loginFragmentInstance;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,7 +47,8 @@ public class AuthActivity extends BaseActivity implements
                 // add the MainActivity (which starts the Welcome fragment) to the task stack
             } else {
                 // not auth'd
-                replaceCurrentFragment(new LoginFragment());
+                loginFragmentInstance = new LoginFragment();
+                replaceCurrentFragment(loginFragmentInstance);
                 // add the Login fragment to the container (always commit transactions)
             }
         }
@@ -65,12 +70,20 @@ public class AuthActivity extends BaseActivity implements
 
     @Override
     public void performToggleToRegister() {
-        replaceCurrentFragment(new RegisterFragment());
+        Log.i("AuthActivity", "performToggleToRegister —> User toggles to register fragment.");
+        if(registerFragmentInstance == null) {
+            registerFragmentInstance = new RegisterFragment();
+        }
+
+        replaceCurrentFragment(registerFragmentInstance);
     }
 
     @Override
     public void performToggleToLogin() {
-        replaceCurrentFragment(new LoginFragment());
+        Log.i("AuthActivity", "performToggleToLogin —> User toggles to login fragment.");
+
+        // should never be null due to what occurs in onCreate
+        replaceCurrentFragment(loginFragmentInstance);
     }
 
     @Override

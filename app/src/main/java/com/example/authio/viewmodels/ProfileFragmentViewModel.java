@@ -1,6 +1,7 @@
 package com.example.authio.viewmodels;
 
 import android.graphics.Bitmap;
+import android.view.View;
 
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -16,6 +17,8 @@ import com.example.authio.repositories.UserRepository;
 public class ProfileFragmentViewModel extends ViewModel {
     private UserRepository userRepository;
     private MutableLiveData<User> mUser;
+
+    private View.OnClickListener confirmChangesButtonListener;
 
     public void init() {
         if(mUser != null) {
@@ -39,5 +42,13 @@ public class ProfileFragmentViewModel extends ViewModel {
 
     public LiveData<User> getUser() {
         return mUser;
+    }
+
+    public View.OnClickListener getConfirmChangesButtonListener() {
+        return confirmChangesButtonListener;
+    }
+
+    public void setConfirmChangesButtonListener(View.OnClickListener confirmChangesListener) {
+        this.confirmChangesButtonListener = confirmChangesListener;
     }
 }

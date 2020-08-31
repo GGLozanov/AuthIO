@@ -26,7 +26,7 @@ public class RegisterFragmentViewModel extends AuthFragmentViewModel {
         return mToken = tokenRepo.getTokenOnRegister(email, username, password, description);
     }
 
-    public LiveData<Model> uploadUserImage(Image image) {
-        return mImage = imageRepository.uploadImage(image);
+    public LiveData<Model> uploadUserImage(String token, Image image) {
+        return mImage = imageRepository.uploadImage(token, image);
     }
 }

@@ -1,5 +1,7 @@
 package com.example.authio.utils;
 
+import android.util.Log;
+
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -57,6 +59,7 @@ public class NetworkUtils {
      */
     public static<T> String extractResponseFromResponseErrorBody(Response<T> response, String responseField)
             throws JSONException, IOException, ResponseSuccessfulException {
+        Log.w("NetworkError", "Extracting response body from response '" + response.message() + "'");
         return (String) extractFieldsFromResponseErrorBody(response, Collections.singletonList(responseField))
                 .get(responseField);
     }

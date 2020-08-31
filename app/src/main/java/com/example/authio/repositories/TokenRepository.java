@@ -35,6 +35,8 @@ public class TokenRepository extends Repository<Token> { // designed to make an 
      * @return MutableLiveData instance with the retrieved JWT
      */
     public MutableLiveData<Token> getTokenOnRegister(String email, String username, String password, String description) {
+        Log.i("TokenRepository", "getTokenOnRegister —> Calling for token result from register endpoint");
+
         Call<Token> authResult = API_OPERATIONS
                 .performRegistration(
                         email,
@@ -50,26 +52,30 @@ public class TokenRepository extends Repository<Token> { // designed to make an 
             public void onResponse(Call<Token> call, Response<Token> response) {
                 // handle application-level errors intended from HTTP response here...
                 Token token;
-                String responseCode;
+                String responseStatus;
 
-                if(response.isSuccessful() && (token = response.body()) != null) {
+                if(response.isSuccessful() && (token = response.body()) != null &&
+                        (responseStatus = token.getResponse()) != null && responseStatus.equals("ok")) {
+                    Log.i("TokenRepository", "getTokenOnRegister —> Received token on register and setting LiveData value to new token");
                     mToken.setValue(token); // when returned livedata will still be null but observers will update after async call is finished
                 } else {
                     try {
-                        responseCode = NetworkUtils.
+                        responseStatus = NetworkUtils.
                                 extractResponseFromResponseErrorBody(response, "response");
                     } catch (JSONException | IOException | NetworkUtils.ResponseSuccessfulException e) {
-                        Log.e("TokenRepo JSON parse", e.toString());
+                        Log.e("TokenRepository", "getTokenOnRegister —> TokenRepo JSON parse failed or response was successful. " + e.toString());
+                        mToken.setValue(Token.asFailed("Failed to parse error response"));
                         return;
                     }
 
-                    mToken.setValue(Token.asFailed(responseCode));
+                    mToken.setValue(Token.asFailed(responseStatus));
                 }
             }
 
             @Override
             public void onFailure(Call<Token> call, Throwable t) {
                 // handle failed HTTP response receiving due to server-side exception here
+                Log.e("TokenRepository", "getTokenOnRegister —> Server error on token retrieval on register");
                 mToken.setValue(Token.asFailed(t.getMessage()));
             }
         });
@@ -84,6 +90,8 @@ public class TokenRepository extends Repository<Token> { // designed to make an 
      * @return - MutableLiveData instance with the retrieved JWT
      */
     public MutableLiveData<Token> getTokenOnLogin(String email, String password) {
+        Log.i("TokenRepository", "getTokenOnLogin —> Calling for token result from login endpoint");
+
         Call<Token> authResult = API_OPERATIONS
                 .performLogin(
                         email,
@@ -95,30 +103,30 @@ public class TokenRepository extends Repository<Token> { // designed to make an 
             @Override
             public void onResponse(Call<Token> call, Response<Token> response) {
                 Token token;
-                String responseCode;
+                String responseStatus;
 
-                if(response.isSuccessful() && (token = response.body()) != null) {
-                    responseCode = token.getResponse();
-
-                    if(responseCode.equals("ok")) {
-                        mToken.setValue(token);
-                    }
+                if(response.isSuccessful() && (token = response.body()) != null &&
+                        (responseStatus = token.getResponse()) != null && responseStatus.equals("ok")) {
+                    Log.i("TokenRepository", "getTokenOnLogin —> Received token on login and setting LiveData value to new token");
+                    mToken.setValue(token);
                 } else {
                     try {
-                        responseCode = NetworkUtils.
+                        responseStatus = NetworkUtils.
                                 extractResponseFromResponseErrorBody(response, "response");
                     } catch (JSONException | IOException | NetworkUtils.ResponseSuccessfulException e) {
-                        Log.e("TokenRepo JSON parse", e.toString());
+                        Log.e("TokenRepository", "getTokenOnLogin —> TokenRepo JSON parse failed or response was successful. " + e.toString());
+                        mToken.setValue(Token.asFailed("Failed to parse error response"));
                         return;
                     }
 
-                    mToken.setValue(Token.asFailed(responseCode));
+                    mToken.setValue(Token.asFailed(responseStatus));
                 }
             }
 
             @Override
             public void onFailure(Call<Token> call, Throwable t) {
                 // handle failed HTTP response receiving due to server-side exception here
+                Log.e("TokenRepository", "Server error on token retrieval on login");
                 mToken.setValue(Token.asFailed(t.getMessage()));
             }
         });

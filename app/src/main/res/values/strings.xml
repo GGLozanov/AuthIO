@@ -27,4 +27,6 @@
 
     <string name="bn_view_users_title">View users</string> <!--bn = bottom nav-->
     <string name="bn_view_self_title">View self</string>
+
+    <string name="confirm">Confirm</string>
 </resources>
