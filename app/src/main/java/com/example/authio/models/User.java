@@ -116,6 +116,18 @@ public class User extends Model implements Parcelable {
         this.photoUrl = photoUrl;
     }
 
+    public void setUsername(@Nullable String username) {
+        this.username = username;
+    }
+
+    public void setDescription(@Nullable String description) {
+        this.description = description;
+    }
+
+    public void setEmail(@Nullable String email) {
+        this.email = email;
+    }
+
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() { // creator used to convert parcelables to model
         public User createFromParcel(Parcel in) {
             return new User(in);

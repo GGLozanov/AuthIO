@@ -26,7 +26,6 @@ public class MainActivity extends BaseActivity implements OnAuthStateReset,
     private BottomNavigationView bottomNavigationView;
     private MenuItem currentItem;
     private ViewPager viewPager;
-    private FragmentPagerAdapter fragmentPagerAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,7 +52,7 @@ public class MainActivity extends BaseActivity implements OnAuthStateReset,
                 return;
             }
 
-            fragmentPagerAdapter = new FragmentPagerAdapter(getSupportFragmentManager(), 0);
+            FragmentPagerAdapter fragmentPagerAdapter = new FragmentPagerAdapter(getSupportFragmentManager(), 0);
 
             Bundle bundle = getIntent().getExtras();
 

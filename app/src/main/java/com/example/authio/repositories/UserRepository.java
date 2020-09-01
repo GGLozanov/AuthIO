@@ -4,6 +4,7 @@ import android.util.Log;
 
 import androidx.lifecycle.MutableLiveData;
 
+import com.example.authio.api.APIOperations;
 import com.example.authio.models.Model;
 import com.example.authio.models.Token;
 import com.example.authio.models.User;
@@ -35,87 +36,6 @@ public class UserRepository extends Repository<User> { // designed to make an AP
         return instance;
     }
 
-    private static class InvalidTokenException extends Exception {
-        public InvalidTokenException() {
-            super();
-        }
-
-        public InvalidTokenException(String message) {
-            super(message);
-        }
-    }
-
-    /**
-     *
-     * @param response - Failed response
-     * @param refreshToken - Refresh token used for refresh token fetch endpoint
-     * @param refreshTokenResponseCallback - Retrofit callback for refresh token endpoint response
-     * @param <T> - generic response type
-     * @return
-     * @throws JSONException - if there is no matching key in the JSON body for a given field
-     * @throws IOException - if the errorBody cannot be converted to a string
-     * @throws NetworkUtils.ResponseSuccessfulException - if the given response is actually successful instead of failed (no errorBody)
-     * @throws InvalidTokenException - if the original token is invalid and not expired
-     */
-    private<T> void handleFailedUserResponse(Response<T> response,
-                                            String refreshToken,
-                                            Callback<Token> refreshTokenResponseCallback)
-            throws JSONException, IOException, NetworkUtils.ResponseSuccessfulException, InvalidTokenException {
-        String responseCode = NetworkUtils.
-                extractResponseFromResponseErrorBody(response, "response");
-
-        if(responseCode == null ||
-                !responseCode.equals("Expired token. Get refresh token.")) {
-            Log.e("UserRepository", "handleFailedUserResponse —> Invalid token error message in failed response body or error message is null");
-            throw new InvalidTokenException();
-        }
-
-        Log.i("UserRepository", "handleFailedUserResponse —> Calling for new token result from refresh token endpoint");
-        Call<Token> tokenResult = API_OPERATIONS.refreshToken(
-                refreshToken
-        ); // fetch new token from refresh token
-
-        tokenResult.enqueue(refreshTokenResponseCallback);
-    }
-
-    /**
-     *
-     * @param response - Token response containing new JWT token
-     * @return - New JWT token if response is valid
-     */
-    private String getTokenFromRefreshResponse(Response<Token> response) {
-        Token token;
-        if(response.isSuccessful() &&
-                (token = response.body()) != null) {
-            String responseCode = token.getResponse();
-            Log.i("UserRepository", "getTokenFromRefreshResponse —> Retrieved new token from refresh_token endpoint.");
-
-            if(responseCode.equals("ok")) {
-                Log.i("UserRepository", "getTokenFromRefreshResponse —> New token from refresh_token endpoint is valid ('ok' status).");
-
-                String jwtToken = token.getJWT(); // new JWT
-
-                PrefConfig prefConfig;
-
-                // TODO: Try to find a way to extract sharedprefs from here and modularise app (this is an exception but try to change that)
-                if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
-                    prefConfig.writeToken(jwtToken); // refresh jwt is null here! (request doesn't contain it)
-                } else {
-                    Log.e("UserRepository", "getTokenFromRefreshResponse —> Couldn't access sharedpreferences from UserRepository");
-                    return null;
-                }
-
-                Log.i("UserRepository", "getTokenFromRefreshResponse —> New token from refresh_token endpoint is saved into sharedprefrences.");
-
-                return jwtToken;
-            }
-        }
-
-        Log.e("UserRepository", "getTokenFromRefreshResponse —> refresh_token endpoint response unsuccessful or body is null. Returning null.");
-
-        return null;
-    }
-
     /**
      *
      * @param token - initial user JWT (saved in sharedprefs usually)
@@ -143,11 +63,11 @@ public class UserRepository extends Repository<User> { // designed to make an AP
                 Log.w("UserRepository", "getUser —> Couldn't retrieve current auth user (response not successful or body is null). Handling failed user response");
                 // if the user is null, their token might have expired => get it back w/ refresh token or reauth
                 try {
-                    handleFailedUserResponse(response, refreshToken, new Callback<Token>() {
+                    NetworkUtils.handleFailedAuthorizedResponse(API_OPERATIONS, response, refreshToken, new Callback<Token>() {
                         @Override
                         public void onResponse(Call<Token> call, Response<Token> response) {
                             String jwtToken;
-                            if((jwtToken = getTokenFromRefreshResponse(response)) != null) {
+                            if((jwtToken =  NetworkUtils.getTokenFromRefreshResponse(response)) != null) {
                                 Log.i("UserRepository", "getUser —> Retrieved new token from refresh_token endpoint and retrying get_user request");
                                 getUser(jwtToken, refreshToken);
                             } else {
@@ -165,8 +85,8 @@ public class UserRepository extends Repository<User> { // designed to make an AP
                     });
                 } catch (JSONException | IOException | NetworkUtils.ResponseSuccessfulException e) {
                     Log.e("UserRepository", "getUser —> UserRepository JSON parse for failed user response failed or response was successful. " + e.toString());
-                    mUser.setValue(User.asFailed("Internal server error. Could not fetch response!"));
-                } catch (InvalidTokenException e) {
+                    mUser.setValue(User.asFailed("Failed: Internal server error. Could not fetch response!"));
+                } catch (NetworkUtils.InvalidTokenException e) {
                     Log.e("UserRepository", "getUser —> Response status from failed user response was invalid (server-side response for invalid token or expiry). Reauth.");
                     mUser.setValue(User.asFailed("Reauth")); // if message = "Reauth", just reauth
                     // if the token hasn't expired but is corrupted, then just log them out
@@ -209,11 +129,11 @@ public class UserRepository extends Repository<User> { // designed to make an AP
                 Log.w("UserRepository", "getUsers —> Couldn't retrieve other users (response not successful or body is null). Handling failed user response");
 
                 try {
-                    handleFailedUserResponse(response, refreshToken, new Callback<Token>() {
+                    NetworkUtils.handleFailedAuthorizedResponse(API_OPERATIONS, response, refreshToken, new Callback<Token>() {
                         @Override
                         public void onResponse(Call<Token> call, Response<Token> response) {
                             String jwtToken;
-                            if((jwtToken = getTokenFromRefreshResponse(response)) != null) {
+                            if((jwtToken = NetworkUtils.getTokenFromRefreshResponse(response)) != null) {
                                 Log.i("UserRepository", "getUsers —> Retrieved new token from refresh_token endpoint and retrying get_users request");
                                 getUsers(jwtToken, refreshToken);
                             } else {
@@ -235,9 +155,9 @@ public class UserRepository extends Repository<User> { // designed to make an AP
                 } catch (JSONException | IOException | NetworkUtils.ResponseSuccessfulException e) {
                     Log.e("UserRepository", "getUsers —> UserRepository JSON parse for failed get_users response failed or response was successful. " + e.toString());
                     mUsers.setValue(new ArrayList<>(
-                            Collections.singletonList(User.asFailed("Internal server error. Could not fetch response!"))
+                            Collections.singletonList(User.asFailed("Failed: Internal server error. Could not fetch response!"))
                     ));
-                } catch(InvalidTokenException e) {
+                } catch(NetworkUtils.InvalidTokenException e) {
                     Log.e("UserRepository", "getUsers —> Response status from failed user response was invalid (server-side response for invalid token or expiry). Reauth.");
                     mUsers.setValue(new ArrayList<>(
                             Collections.singletonList(User.asFailed("Reauth"))
@@ -256,4 +176,65 @@ public class UserRepository extends Repository<User> { // designed to make an AP
 
         return mUsers;
     }
+
+    public MutableLiveData<Model> updateUser(String token, String refreshToken, Map<String, String> body) {
+        Log.i("UserRepository", "updateUser —> Calling for user update from edit_user endpoint.");
+
+        Call<Model> editUserResult = API_OPERATIONS.editUser(
+                token,
+                body
+        );
+
+        final MutableLiveData<Model> mModel = new MutableLiveData<>();
+        editUserResult.enqueue(new Callback<Model>() {
+            @Override
+            public void onResponse(Call<Model> call, Response<Model> response) {
+                Model model;
+                if(response.isSuccessful() && (model = response.body()) != null) {
+                    Log.i("UserRepository", "updateUser —> Retrieved response from backend for user update and setting it to LiveData instance.");
+                    mModel.setValue(model);
+                    return;
+                }
+
+                Log.w("UserRepository", "updateUser —> Couldn't update user (response not successful or body is null). Handling failed edit response");
+
+                try {
+                    NetworkUtils.handleFailedAuthorizedResponse(API_OPERATIONS, response, refreshToken, new Callback<Token>() {
+                        @Override
+                        public void onResponse(Call<Token> call, Response<Token> response) {
+                            String jwtToken;
+                            if((jwtToken = NetworkUtils.getTokenFromRefreshResponse(response)) != null) {
+                                Log.i("UserRepository", "updateUser —> Retrieved new token from refresh_token endpoint and retrying get_users request");
+                                updateUser(jwtToken, refreshToken, body);
+                            } else {
+                                Log.i("UserRepository", "updateUser —> Retrieved new token from refresh_token endpoint but token is either invalid or expired. Reauth.");
+                                mModel.setValue(Model.asFailed(response.message()));
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Token> call, Throwable t) {
+                            Log.e("UserRepository", "updateUser —> Server error on new token retrieval. Reauth + error message.");
+                            mModel.setValue(Model.asFailed(t.getMessage()));
+                        }
+                    });
+                } catch (JSONException | IOException | NetworkUtils.ResponseSuccessfulException e) {
+                    Log.e("UserRepository", "updateUser —> UserRepository JSON parse for failed get_users response failed or response was successful. " + e.toString());
+                } catch(NetworkUtils.InvalidTokenException e) {
+                    Log.e("UserRepository", "updateUser —> Response status from failed user response was invalid (server-side response for invalid token or expiry). Reauth.");
+                } finally {
+                    mModel.setValue(Model.asFailed(response.message()));
+                }
+            }
+
+            @Override
+            public void onFailure(Call<Model> call, Throwable t) {
+                Log.e("UserRepository", "updateUser —> Server error on edit user attempt. Reauth + error message.");
+                mModel.setValue(Model.asFailed(t.getMessage()));
+            }
+        });
+
+        return mModel;
+    }
+
 }

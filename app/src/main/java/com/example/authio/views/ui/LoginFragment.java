@@ -78,7 +78,7 @@ public class LoginFragment extends AuthFragment {
         if(emailInput.isInvalid() | passwordInput.isInvalid()) {
             showErrorMessage("Invalid info in fields!", emailInput.wasInvalid() ?
                             "Enter a valid e-mail" : null,
-                    passwordInput.wasInvalid() ? "Enter a password" : null);
+                    passwordInput.wasInvalid() ? "Enter a (longer) password" : null);
             return;
         }
 

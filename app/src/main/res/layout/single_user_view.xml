@@ -7,9 +7,6 @@
         FIXME (while keeping LiveData support from ViewModel and passing in immutable user instance for reading)-->
     <data>
         <variable
-            name="viewmodel"
-            type="com.example.authio.viewmodels.ProfileFragmentViewModel" />
-        <variable
             name="immutableUser"
             type="com.example.authio.models.User" /> <!--Used when setting ListView  after being fetched by network-->
     </data>
@@ -25,13 +22,13 @@
         android:padding="10dp">
 
         <TextView
-            android:id="@+id/username_text"
+            android:id="@+id/username_edit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_margin="10dp"
             android:padding="5dp"
-            android:text="@{immutableUser.username ?? viewmodel.user.username}"
+            android:text="@{immutableUser.username}"
             android:textSize="18sp"
             android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@+id/profile_image"
@@ -53,60 +50,29 @@
             android:padding="10dp"
             android:scaleType="centerCrop"
             android:visibility="visible"
-            app:layout_constraintBottom_toTopOf="@id/email_text"
+            app:layout_constraintBottom_toTopOf="@id/description_edit"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/username_text"
+            app:layout_constraintTop_toBottomOf="@+id/username_edit"
             app:srcCompat="@drawable/default_img"
             tools:src="@drawable/default_img"
             tools:visibility="visible" />
 
         <TextView
-            android:id="@+id/email_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
-            android:padding="5dp"
-            android:text="@{immutableUser.email ?? viewmodel.user.email}"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            app:layout_constraintBottom_toTopOf="@+id/description_text"
-            app:layout_constraintEnd_toStartOf="parent"
-            app:layout_constraintStart_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/profile_image" />
-
-        <TextView
-            android:id="@+id/description_text"
+            android:id="@+id/description_edit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_margin="10dp"
             android:gravity="center"
             android:padding="5dp"
-            android:text="@{immutableUser.description ?? viewmodel.user.description}"
+            android:text="@{immutableUser.description}"
             android:textSize="18sp"
             android:textStyle="bold"
-            app:layout_constraintBottom_toBottomOf="@id/confirm_button"
+            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="parent"
             app:layout_constraintStart_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/email_text" />
+            app:layout_constraintTop_toBottomOf="@+id/profile_image" />
 
-        <Button
-            android:id="@+id/confirm_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="@drawable/round_button"
-            android:drawableStart="@drawable/ic_check_white_24dp"
-            android:drawableLeft="@drawable/ic_check_white_24dp"
-            android:paddingLeft="10dp"
-            android:paddingRight="10dp"
-            android:text="@string/confirm"
-            android:textSize="14sp"
-            android:textStyle="bold"
-            android:onClick="@{viewmodel != null ? viewmodel.confirmChangesBtnListener : null}"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/description_text" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

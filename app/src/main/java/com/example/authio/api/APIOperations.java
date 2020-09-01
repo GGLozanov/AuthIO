@@ -8,6 +8,7 @@ import java.util.Map;
 
 import retrofit2.Call;
 import retrofit2.http.Field;
+import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.Header;
@@ -15,6 +16,7 @@ import retrofit2.http.POST;
 import retrofit2.http.Query;
 
 public interface APIOperations {
+    // TODO: Update requests (& backend) with header maps (Content-Type, etc.)
 
     /**
      * FormUrlEncoded POST request to create a new User resource with given credentials
@@ -86,6 +88,19 @@ public interface APIOperations {
     @GET("api/service/get_users.php")
     Call<Map<String, User>> getUsers(
             @Header("Authorization") String token
+    );
+
+    /**
+     * POST request to update a given user with the params specified in the body
+     * @param token - JWT for the given auth user used to validate requests to secure endpoints (contains auth user's id)
+     * @param body - POST body fields containing key-value pairs on fields to be updated in the backend
+     * @return - a Model containing a response from the server based on success or failure
+     */
+    @POST("api/service/edit_user.php") // should semantically be PATCH but w/e (for now) FIXME potentially in backend
+    @FormUrlEncoded
+    Call<Model> editUser(
+            @Header("Authorization") String token,
+            @FieldMap Map<String, String> body // variable body parameters (which is why a map is used)
     );
 
     /*

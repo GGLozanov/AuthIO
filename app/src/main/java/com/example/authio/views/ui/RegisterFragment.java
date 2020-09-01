@@ -27,6 +27,8 @@ import android.widget.ImageView;
 
 import com.example.authio.R;
 import com.example.authio.api.APIClient;
+import com.example.authio.shared.Callbacks;
+import com.example.authio.shared.ErrorPredicates;
 import com.example.authio.utils.PrefConfig;
 import com.example.authio.utils.TokenUtils;
 import com.example.authio.viewmodels.RegisterFragmentViewModel;
@@ -78,9 +80,9 @@ public class RegisterFragment extends AuthFragment {
                 (v) -> performRegister());
 
         usernameInput = ((ErrableEditText) view.findViewById(R.id.username_input_field))
-                .withErrorPredicate(String::isEmpty);
+                .withErrorPredicate(ErrorPredicates.username);
         descriptionInput = ((ErrableEditText) view.findViewById(R.id.description_input_field))
-                .withErrorPredicate(String::isEmpty);
+                .withErrorPredicate(ErrorPredicates.description);
         profileImage = view.findViewById(R.id.profile_image);
 
         profileImage.setOnClickListener((v) -> {
@@ -100,34 +102,16 @@ public class RegisterFragment extends AuthFragment {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         // receive result from other activity after it finishes. . .
-        Uri imagePath; // Uri for image
 
-        if(requestCode == IMG_REQUEST_CODE &&
-                resultCode == RESULT_OK &&
-                data != null && (imagePath = data.getData()) != null) {
-            Log.i("RegisterFragment", "onActivityResult (image retrieval) —> User has selected their profile picture");
-
-            ContentResolver contentResolver = getActivity()
-                    .getContentResolver(); // provides access to content model (class used to interface and access the data)
-
-            try {
-                if(Build.VERSION.SDK_INT < 28) {
-                    bitmap = MediaStore.Images.Media.getBitmap(
-                            contentResolver,
-                            imagePath
-                    );
-                } else {
-                    bitmap = ImageDecoder.decodeBitmap(
-                        ImageDecoder.createSource(
-                            contentResolver,
-                            imagePath
-                        )
-                    );
-                }
-                profileImage.setImageBitmap(bitmap); // set the new image resource to be decoded from the bitmap
-            } catch(IOException e) {
-                Log.e("RegisterFragment", "onActivityResult (image retrieval) —> " + e.toString());
-            }
+        if((bitmap = Callbacks.getBitmapFromImageOnActivityResult(
+                getActivity(),
+                IMG_REQUEST_CODE,
+                requestCode,
+                resultCode,
+                data)) != null) {
+            profileImage.setImageBitmap(
+                    bitmap
+            ); // set the new image resource to be decoded from the bitmap
         }
     }
 
@@ -149,14 +133,14 @@ public class RegisterFragment extends AuthFragment {
                 | usernameInput.isInvalid() | descriptionInput.isInvalid()) { // disable lazy eval; fucks over predicate testing
             showErrorMessage("Invalid info in fields!", emailInput.wasInvalid() ?
                             "Enter a valid e-mail" : null,
-                    passwordInput.wasInvalid() ? "Enter a password" : null);
+                    passwordInput.wasInvalid() ? "Enter a valid password (3 to 24 characters)" : null);
 
             if(usernameInput.wasInvalid()) {
-                usernameInput.setError("Enter a username");
+                usernameInput.setError("Enter a valid username (2 to 25 characters)");
             }
 
             if(descriptionInput.wasInvalid()) {
-                descriptionInput.setError("Enter a description");
+                descriptionInput.setError("Enter a description (5 to 30 characters)");
             }
 
             return;

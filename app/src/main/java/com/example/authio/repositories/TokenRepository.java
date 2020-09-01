@@ -58,18 +58,24 @@ public class TokenRepository extends Repository<Token> { // designed to make an 
                         (responseStatus = token.getResponse()) != null && responseStatus.equals("ok")) {
                     Log.i("TokenRepository", "getTokenOnRegister —> Received token on register and setting LiveData value to new token");
                     mToken.setValue(token); // when returned livedata will still be null but observers will update after async call is finished
-                } else {
-                    try {
-                        responseStatus = NetworkUtils.
-                                extractResponseFromResponseErrorBody(response, "response");
-                    } catch (JSONException | IOException | NetworkUtils.ResponseSuccessfulException e) {
-                        Log.e("TokenRepository", "getTokenOnRegister —> TokenRepo JSON parse failed or response was successful. " + e.toString());
-                        mToken.setValue(Token.asFailed("Failed to parse error response"));
-                        return;
-                    }
-
-                    mToken.setValue(Token.asFailed(responseStatus));
+                    return;
                 }
+
+                if(response.code() == 406) {
+                    mToken.setValue(Token.asFailed("Invalid credentials"));
+                    return;
+                }
+
+                try {
+                    responseStatus = NetworkUtils.
+                            extractResponseFromResponseErrorBody(response, "response");
+                } catch (JSONException | IOException | NetworkUtils.ResponseSuccessfulException e) {
+                    Log.e("TokenRepository", "getTokenOnRegister —> TokenRepo JSON parse failed or response was successful. " + e.toString());
+                    mToken.setValue(Token.asFailed("Failed to parse error response"));
+                    return;
+                }
+
+                mToken.setValue(Token.asFailed(responseStatus));
             }
 
             @Override
@@ -109,18 +115,19 @@ public class TokenRepository extends Repository<Token> { // designed to make an 
                         (responseStatus = token.getResponse()) != null && responseStatus.equals("ok")) {
                     Log.i("TokenRepository", "getTokenOnLogin —> Received token on login and setting LiveData value to new token");
                     mToken.setValue(token);
-                } else {
-                    try {
-                        responseStatus = NetworkUtils.
-                                extractResponseFromResponseErrorBody(response, "response");
-                    } catch (JSONException | IOException | NetworkUtils.ResponseSuccessfulException e) {
-                        Log.e("TokenRepository", "getTokenOnLogin —> TokenRepo JSON parse failed or response was successful. " + e.toString());
-                        mToken.setValue(Token.asFailed("Failed to parse error response"));
-                        return;
-                    }
-
-                    mToken.setValue(Token.asFailed(responseStatus));
+                    return;
                 }
+
+                try {
+                    responseStatus = NetworkUtils.
+                            extractResponseFromResponseErrorBody(response, "response");
+                } catch (JSONException | IOException | NetworkUtils.ResponseSuccessfulException e) {
+                    Log.e("TokenRepository", "getTokenOnLogin —> TokenRepo JSON parse failed or response was successful. " + e.toString());
+                    mToken.setValue(Token.asFailed("Failed to parse error response"));
+                    return;
+                }
+
+                mToken.setValue(Token.asFailed(responseStatus));
             }
 
             @Override

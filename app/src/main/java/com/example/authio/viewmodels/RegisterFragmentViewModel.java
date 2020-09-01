@@ -27,6 +27,7 @@ public class RegisterFragmentViewModel extends AuthFragmentViewModel {
     }
 
     public LiveData<Model> uploadUserImage(String token, Image image) {
-        return mImage = imageRepository.uploadImage(token, image);
+        // refreshToken can be null here since whenever this method is called from RegisterFragment, there is ALWAYS a new token
+        return mImage = imageRepository.uploadImage(token, null, image);
     }
 }

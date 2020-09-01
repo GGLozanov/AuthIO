@@ -22,7 +22,8 @@ public class APIClient {
                     .baseUrl(BuildConfig.BASE_URL) // add the base url (envvar)
                     .addConverterFactory(
                         GsonConverterFactory.create(
-                            new GsonBuilder().setLenient().create()
+                            new GsonBuilder()
+                                    .setLenient().create()
                         ) // set the builder to be more lenient for 'malformed' JSON
                     ) // add a converter for HTTP responses in JSON
                     .build(); // build the retrofit instance

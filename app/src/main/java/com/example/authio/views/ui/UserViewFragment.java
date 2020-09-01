@@ -3,7 +3,6 @@ package com.example.authio.views.ui;
 import android.os.Bundle;
 
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.util.Log;
@@ -14,13 +13,8 @@ import android.widget.ListView;
 
 import com.example.authio.R;
 import com.example.authio.adapters.UserListViewAdapter;
-import com.example.authio.models.User;
-import com.example.authio.utils.PrefConfig;
 import com.example.authio.viewmodels.UserViewFragmentViewModel;
 import com.example.authio.views.activities.MainActivity;
-
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -50,7 +44,7 @@ public class UserViewFragment extends MainFragment {
                     prefConfig.readToken(), prefConfig.readRefreshToken())
                 .observe(this, (users) -> {
                     if(users != null) {
-                        if(users.get(0).getResponse().equals("Reauth")) {
+                        if(users.size() >= 1 && users.get(0).getResponse() != null && users.get(0).getResponse().equals("Reauth")) {
                             // means failed response - something went wrong
                             onAuthStateReset.performAuthReset();
                             prefConfig.displayToast("Your session has expired or something might be wrong. Please login again.");
@@ -59,7 +53,7 @@ public class UserViewFragment extends MainFragment {
 
                         UserListViewAdapter userListViewAdapter;
                         if((userListViewAdapter = (UserListViewAdapter) usersList.getAdapter()) == null) {
-                            usersList.setAdapter(new UserListViewAdapter(getContext(), R.layout.single_user, users));
+                            usersList.setAdapter(new UserListViewAdapter(getContext(), R.layout.single_user_view, users));
                         } else {
                             userListViewAdapter
                                     .setUsers(users);

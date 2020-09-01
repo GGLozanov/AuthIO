@@ -1,9 +1,7 @@
 package com.example.authio.views.ui;
 
-import android.util.Patterns;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -11,6 +9,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.example.authio.R;
+import com.example.authio.shared.ErrorPredicates;
 import com.example.authio.viewmodels.AuthFragmentViewModel;
 import com.example.authio.views.custom.ErrableEditText;
 
@@ -30,11 +29,9 @@ public abstract class AuthFragment extends Fragment {
 
     protected void initAuthFields(View view) {
         emailInput = ((ErrableEditText) view.findViewById(R.id.email_input_field))
-                .withErrorPredicate((email) ->
-                        email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches());
+                .withErrorPredicate(ErrorPredicates.email);
         passwordInput = ((ErrableEditText) view.findViewById(R.id.password_input_field))
-                .withErrorPredicate((password) ->
-                        password.isEmpty() || password.length() < 4);
+                .withErrorPredicate(ErrorPredicates.password);
 
         toggleText = view.findViewById(R.id.toggle_text);
         errorText = view.findViewById(R.id.error_text);

@@ -1,29 +1,44 @@
 package com.example.authio.views.ui;
 
-import android.app.Activity;
-import android.content.Context;
+import android.content.ContentResolver;
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.ImageDecoder;
+import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 
-import androidx.core.os.HandlerCompat;
+import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
 import com.example.authio.R;
-import com.example.authio.api.OnAuthStateReset;
-import com.example.authio.databinding.SingleUserBinding;
-import com.example.authio.utils.PrefConfig;
+import com.example.authio.databinding.SingleUserEditBinding;
+import com.example.authio.models.Image;
+import com.example.authio.shared.Callbacks;
+import com.example.authio.shared.ErrorPredicates;
+import com.example.authio.utils.ImageUtils;
 import com.example.authio.viewmodels.ProfileFragmentViewModel;
 import com.example.authio.views.activities.MainActivity;
 import com.example.authio.models.User;
+import com.example.authio.views.custom.ErrableEditText;
+
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+import static android.app.Activity.RESULT_OK;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -32,7 +47,12 @@ public class ProfileFragment extends MainFragment {
 
     private ImageView profileImage;
 
-    private ProfileFragmentViewModel viewModel;
+    // FIXME grr, code duplication in ProfileFragment and RegisterFragment (where are mixins when you need them...)
+    private static int IMG_REQUEST_CODE = 555;
+    private Bitmap bitmap;
+    private User fetchedUser;
+
+    private ErrableEditText usernameEditText, descriptionEditText;
 
     public ProfileFragment() {
         // Required empty public constructor
@@ -42,17 +62,72 @@ public class ProfileFragment extends MainFragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        viewModel = new ViewModelProvider(requireActivity())
+        ProfileFragmentViewModel viewModel = new ViewModelProvider(requireActivity())
                 .get(ProfileFragmentViewModel.class);
         viewModel.init();
 
-        SingleUserBinding binding = DataBindingUtil.inflate(
-                inflater, R.layout.single_user, container, false);
+        SingleUserEditBinding binding = DataBindingUtil.inflate(
+                inflater, R.layout.single_user_edit, container, false);
 
         View view = binding.getRoot();
             // always inflate this layout instead of the default one
             // when using data binding in a fragment -> this one includes the databinding config
             // otherwise your UI components will become unresponsive due to finding views in a mismatching view (not that from the data binding)
+
+        usernameEditText = ((ErrableEditText) view.findViewById(R.id.username_edit))
+                            .withErrorPredicate(ErrorPredicates.username);
+        descriptionEditText = ((ErrableEditText) view.findViewById(R.id.description_edit))
+                            .withErrorPredicate(ErrorPredicates.description);
+
+        viewModel.setConfirmChangesButtonListener((v) -> {
+            // if bitmap is not null, then onActivityResult was called => pfp was changed
+            if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
+                String token = prefConfig.readToken();
+                String refreshToken = prefConfig.readRefreshToken();
+
+                if(bitmap != null) {
+                    viewModel.uploadImage(
+                            token,
+                            refreshToken,
+                            new Image(null, ImageUtils.encodeImage(bitmap))
+                    );
+                }
+
+                Map<String, String> editUserBody = new HashMap<>();
+
+                String username;
+                if(!(username = Objects.requireNonNull(usernameEditText.getText()).toString())
+                        .equals(fetchedUser.getUsername())) {
+                    editUserBody.put("username", username);
+                }
+
+                String description;
+                if(!(description = Objects.requireNonNull(descriptionEditText.getText()).toString())
+                        .equals(fetchedUser.getDescription())) {
+                    editUserBody.put("description", description);
+                }
+
+                if(!editUserBody.isEmpty()) {
+                    viewModel.updateUser(token, refreshToken, editUserBody)
+                        .observe(this, (result) -> {
+                            if(result.getResponse().equals("ok")) {
+                                // TODO: Update user LiveData or not? Wakes up unnecessary observers but can help with possible future observers outside this fragment
+                                prefConfig.displayToast("User successfully updated!");
+                                v.setEnabled(false); // disable button (antispam)
+                                v.postDelayed(() -> // append delayed message to internal handler's message queue to reenable the button
+                                    v.setEnabled(true), 1000*5); // reenable after delay
+                            } else {
+                                Log.w("ProfileFragment", "Failed to edit user -> " + result.getResponse());
+                                prefConfig.displayToast("Couldn't update user! Please login again!");
+                                onAuthStateReset.performAuthReset(); // TODO: Specify errors; may prove to be too ambiguous
+                            }
+                        });
+                }
+            } else {
+                Log.e("ProfileFragment", "Found no reference to sharedpreferences in WelcomeFragment.");
+                onAuthStateReset.performAuthReset();
+            }
+        });
 
         binding.setLifecycleOwner(this); // important for livedata (due to it being lifecycle aware)
         binding.setViewmodel(viewModel); // set the property in the data-bound xml as to access its props there
@@ -80,6 +155,8 @@ public class ProfileFragment extends MainFragment {
 
     private void handleObservedUser(User user) {
         if(user != null) {
+            fetchedUser = user;
+
             String responseCode = user.getResponse();
 
             String photoUrl;
@@ -87,6 +164,15 @@ public class ProfileFragment extends MainFragment {
                 Glide.with(this)
                         .load(photoUrl)
                         .into(profileImage); // Glide makes image loading and caching a dream - no AsyncTasks or Lrucaches here!
+
+                profileImage.setOnClickListener((v) -> {
+                    Log.i("ProfileFragment", "ProfileImageOnClickListener —> User is selecting their profile picture");
+
+                    Intent selectImageIntent = new Intent();
+                    selectImageIntent.setType("image/*");
+                    selectImageIntent.setAction(Intent.ACTION_GET_CONTENT);
+                    startActivityForResult(selectImageIntent, IMG_REQUEST_CODE);
+                }); // set the ability for user to change their pfp now
             } else if(responseCode.equals("Reauth")) {
                 onAuthStateReset.performAuthReset();
             } else if(responseCode.contains("Failed: ")) {
@@ -100,5 +186,20 @@ public class ProfileFragment extends MainFragment {
     private void displayErrorAndReauth(String error) {
         prefConfig.displayToast(error);
         onAuthStateReset.performAuthReset(); // logout upon failure
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if((bitmap = Callbacks.getBitmapFromImageOnActivityResult(
+                getActivity(),
+                IMG_REQUEST_CODE,
+                requestCode,
+                resultCode,
+                data)) != null) {
+            profileImage.setImageBitmap(
+                    bitmap
+            ); // set the new image resource to be decoded from the bitmap
+        }
     }
 }

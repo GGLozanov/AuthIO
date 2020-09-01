@@ -12,7 +12,7 @@ import androidx.databinding.DataBindingUtil;
 
 import com.bumptech.glide.Glide;
 import com.example.authio.R;
-import com.example.authio.databinding.SingleUserBinding;
+import com.example.authio.databinding.SingleUserViewBinding;
 import com.example.authio.models.User;
 
 import java.util.List;
@@ -36,7 +36,7 @@ public class UserListViewAdapter extends ArrayAdapter<User> {
     }
 
     private static class UserHolder {
-        SingleUserBinding singleUserBinding;
+        SingleUserViewBinding singleUserViewBinding;
         ImageView profileImage;
     }
 
@@ -54,9 +54,9 @@ public class UserListViewAdapter extends ArrayAdapter<User> {
 
             if(userCard == null)  {
                 userHolder = new UserHolder();
-                userHolder.singleUserBinding = DataBindingUtil.inflate(
+                userHolder.singleUserViewBinding = DataBindingUtil.inflate(
                         LayoutInflater.from(getContext()), // has access to context. . . somehow?
-                        R.layout.single_user,
+                        R.layout.single_user_view,
                         parent,
                         false
                 );
@@ -66,7 +66,7 @@ public class UserListViewAdapter extends ArrayAdapter<User> {
                     parent,
                     false); // other optional inflation */
 
-                userCard = userHolder.singleUserBinding.getRoot();
+                userCard = userHolder.singleUserViewBinding.getRoot();
 
                 userHolder.profileImage = userCard.findViewById(R.id.profile_image);
 
@@ -74,9 +74,6 @@ public class UserListViewAdapter extends ArrayAdapter<User> {
             } else {
                 userHolder = (UserHolder) userCard.getTag();
             }
-
-            userCard.findViewById(R.id.confirm_button)
-                    .setVisibility(View.GONE); // remove confirm options button from layout
 
             String photoUrl;
             if(user != null && (photoUrl = user.getPhotoUrl()) != null)  {
@@ -89,7 +86,7 @@ public class UserListViewAdapter extends ArrayAdapter<User> {
                 );
             }
 
-            userHolder.singleUserBinding.setImmutableUser(user);
+            userHolder.singleUserViewBinding.setImmutableUser(user);
         }
 
         return userCard;
