@@ -1,13 +1,10 @@
-package com.example.authio.views.ui;
+package com.example.authio.views.ui.fragments;
 
 
 import android.app.Activity;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.ImageDecoder;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -16,19 +13,15 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.provider.MediaStore;
 import android.util.Log;
-import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.EditText;
 import android.widget.ImageView;
 
 import com.example.authio.R;
 import com.example.authio.api.APIClient;
 import com.example.authio.shared.Callbacks;
-import com.example.authio.shared.ErrorPredicates;
 import com.example.authio.utils.PrefConfig;
 import com.example.authio.utils.TokenUtils;
 import com.example.authio.viewmodels.RegisterFragmentViewModel;
@@ -39,10 +32,7 @@ import com.example.authio.utils.ImageUtils;
 import com.example.authio.views.activities.AuthActivity;
 import com.example.authio.views.custom.ErrableEditText;
 
-import java.io.IOException;
 import java.util.Objects;
-
-import static android.app.Activity.RESULT_OK;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -80,9 +70,9 @@ public class RegisterFragment extends AuthFragment {
                 (v) -> performRegister());
 
         usernameInput = ((ErrableEditText) view.findViewById(R.id.username_input_field))
-                .withErrorPredicate(ErrorPredicates.username);
+                .asUsername();
         descriptionInput = ((ErrableEditText) view.findViewById(R.id.description_input_field))
-                .withErrorPredicate(ErrorPredicates.description);
+                .asDescription();
         profileImage = view.findViewById(R.id.profile_image);
 
         profileImage.setOnClickListener((v) -> {
@@ -129,20 +119,9 @@ public class RegisterFragment extends AuthFragment {
                 username = Objects.requireNonNull(usernameInput.getText()).toString(),
                 description = Objects.requireNonNull(descriptionInput.getText()).toString();
 
-        if(emailInput.isInvalid() | passwordInput.isInvalid()
-                | usernameInput.isInvalid() | descriptionInput.isInvalid()) { // disable lazy eval; fucks over predicate testing
-            showErrorMessage("Invalid info in fields!", emailInput.wasInvalid() ?
-                            "Enter a valid e-mail" : null,
-                    passwordInput.wasInvalid() ? "Enter a valid password (3 to 24 characters)" : null);
-
-            if(usernameInput.wasInvalid()) {
-                usernameInput.setError("Enter a valid username (2 to 25 characters)");
-            }
-
-            if(descriptionInput.wasInvalid()) {
-                descriptionInput.setError("Enter a description (5 to 30 characters)");
-            }
-
+        if(emailInput.setErrorTextIfError() | passwordInput.setErrorTextIfError()
+                | usernameInput.setErrorTextIfError() | descriptionInput.setErrorTextIfError()) { // disable lazy eval; fucks over predicate testing
+            showErrorMessage("Invalid info in fields!");
             return;
         }
 

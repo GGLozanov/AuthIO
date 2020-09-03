@@ -5,14 +5,14 @@
     android:layout_height="match_parent"
     android:visibility="visible"
     tools:visibility="visible"
-    tools:context=".views.ui.LoginFragment">
+    tools:context=".views.ui.fragments.LoginFragment">
 
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center|center_horizontal|center_vertical"
-        android:layout_marginBottom="40dp"
-        tools:context=".views.ui.LoginFragment">
+        android:layout_marginBottom="35dp"
+        tools:context=".views.ui.fragments.LoginFragment">
 
         <LinearLayout
             android:layout_width="wrap_content"

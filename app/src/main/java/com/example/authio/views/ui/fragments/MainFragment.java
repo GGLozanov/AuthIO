@@ -1,4 +1,4 @@
-package com.example.authio.views.ui;
+package com.example.authio.views.ui.fragments;
 
 import android.app.Activity;
 import android.content.Context;

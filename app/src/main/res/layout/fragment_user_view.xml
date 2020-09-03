@@ -3,16 +3,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".views.ui.UserViewFragment">
+    tools:context=".views.ui.fragments.UserViewFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <ListView
         android:id="@+id/users_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
         android:divider="@android:color/transparent"
         android:dividerHeight="10dp"
+        android:paddingTop="15dp"
+        android:paddingBottom="65dp"
         tools:listitem="@layout/single_user_view">
 
     </ListView>

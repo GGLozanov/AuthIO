@@ -1,4 +1,4 @@
-package com.example.authio.views.ui;
+package com.example.authio.views.ui.fragments;
 
 import android.view.View;
 import android.widget.Button;
@@ -29,9 +29,9 @@ public abstract class AuthFragment extends Fragment {
 
     protected void initAuthFields(View view) {
         emailInput = ((ErrableEditText) view.findViewById(R.id.email_input_field))
-                .withErrorPredicate(ErrorPredicates.email);
+                .asEmail();
         passwordInput = ((ErrableEditText) view.findViewById(R.id.password_input_field))
-                .withErrorPredicate(ErrorPredicates.password);
+                .asPassword();
 
         toggleText = view.findViewById(R.id.toggle_text);
         errorText = view.findViewById(R.id.error_text);
@@ -44,16 +44,7 @@ public abstract class AuthFragment extends Fragment {
         authButton.setOnClickListener(authButtonListener);
     }
 
-    protected void showErrorMessage(@NonNull String message, @Nullable String emailFormError,
-                                    @Nullable String passwordFormError) {
-        if(emailFormError != null) {
-            emailInput.setError(emailFormError);
-        }
-
-        if(passwordFormError != null) {
-            passwordInput.setError(passwordFormError);
-        }
-
+    protected void showErrorMessage(@NonNull String message) {
         errorText.setVisibility(View.VISIBLE);
         errorText.setText(message);
     }

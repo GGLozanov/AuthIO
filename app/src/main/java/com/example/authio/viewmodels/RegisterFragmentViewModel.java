@@ -23,7 +23,7 @@ public class RegisterFragmentViewModel extends AuthFragmentViewModel {
     }
 
     public LiveData<Token> getRegisterToken(String email, String username, String password, String description) {
-        return mToken = tokenRepo.getTokenOnRegister(email, username, password, description);
+        return mToken = tokenRepository.getTokenOnRegister(email, username, password, description);
     }
 
     public LiveData<Model> uploadUserImage(String token, Image image) {

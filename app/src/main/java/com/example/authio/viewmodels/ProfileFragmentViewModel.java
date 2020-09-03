@@ -1,33 +1,43 @@
 package com.example.authio.viewmodels;
 
-import android.graphics.Bitmap;
+import android.app.AlertDialog;
+import android.content.Context;
 import android.view.View;
 
+import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.authio.models.Image;
 import com.example.authio.models.Model;
+import com.example.authio.models.Token;
 import com.example.authio.models.User;
 import com.example.authio.repositories.ImageRepository;
+import com.example.authio.repositories.TokenRepository;
 import com.example.authio.repositories.UserRepository;
+import com.example.authio.views.ui.dialogs.EmailChangeDialogFragment;
+import com.example.authio.views.ui.fragments.ProfileFragment;
 
 import java.util.Map;
 
 /**
  * ProfileFragment ViewModel which can be used to bind all types of cards for single_user_view layout
+ * Also capable of login authentication interactions (extending LoginFragmentViewModel)
+ * TODO: Change from extending this class; semantically and probably progmatically dumb
  */
-public class ProfileFragmentViewModel extends ViewModel {
-    private ImageRepository imageRepository;
-    private MutableLiveData<Model> mImage; // image response represented as model (with only response)
-
+public class ProfileFragmentViewModel extends LoginFragmentViewModel {
     private UserRepository userRepository;
     private MutableLiveData<User> mUser;
 
+    private ImageRepository imageRepository;
+
     private View.OnClickListener confirmChangesButtonListener;
+    private View.OnClickListener changeEmailButtonListener;
+    private View.OnClickListener changePasswordButtonListener;
 
     public void init() {
+        super.init();
         if(mUser != null) {
             return;
         }
@@ -53,7 +63,7 @@ public class ProfileFragmentViewModel extends ViewModel {
     }
 
     public LiveData<Model> uploadImage(String token, String refreshToken, Image image) {
-        return mImage = imageRepository.uploadImage(token, refreshToken, image);
+        return imageRepository.uploadImage(token, refreshToken, image);
     }
 
     public LiveData<User> getUser() {
@@ -68,4 +78,19 @@ public class ProfileFragmentViewModel extends ViewModel {
         this.confirmChangesButtonListener = confirmChangesListener;
     }
 
+    public View.OnClickListener getChangeEmailButtonListener() {
+        return changeEmailButtonListener;
+    }
+
+    public void setChangeEmailButtonListener(View.OnClickListener changeEmailButtonListener) {
+        this.changeEmailButtonListener = changeEmailButtonListener;
+    }
+
+    public View.OnClickListener getChangePasswordButtonListener() {
+        return changePasswordButtonListener;
+    }
+
+    public void setChangePasswordButtonListener(View.OnClickListener changePasswordButtonListener) {
+        this.changePasswordButtonListener = changePasswordButtonListener;
+    }
 }

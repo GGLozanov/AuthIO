@@ -14,8 +14,8 @@ import com.example.authio.R;
 import com.example.authio.adapters.FragmentPagerAdapter;
 import com.example.authio.api.OnAuthStateReset;
 import com.example.authio.utils.PrefConfig;
-import com.example.authio.views.ui.ProfileFragment;
-import com.example.authio.views.ui.UserViewFragment;
+import com.example.authio.views.ui.fragments.ProfileFragment;
+import com.example.authio.views.ui.fragments.UserViewFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.lang.ref.WeakReference;

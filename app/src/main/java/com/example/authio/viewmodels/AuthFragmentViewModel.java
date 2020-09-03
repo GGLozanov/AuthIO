@@ -6,15 +6,15 @@ import androidx.lifecycle.ViewModel;
 import com.example.authio.models.Token;
 import com.example.authio.repositories.TokenRepository;
 
-public class AuthFragmentViewModel extends ViewModel  {
+public abstract class AuthFragmentViewModel extends ViewModel  {
+    protected TokenRepository tokenRepository;
     protected MutableLiveData<Token> mToken;
-    protected TokenRepository tokenRepo;
 
     public void init() {
         if(mToken != null) {
             return;
         }
 
-        tokenRepo = TokenRepository.getInstance();
+        tokenRepository = TokenRepository.getInstance();
     }
 }

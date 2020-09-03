@@ -1,20 +1,16 @@
-package com.example.authio.views.ui;
+package com.example.authio.views.ui.fragments;
 
-import android.content.ContentResolver;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.graphics.ImageDecoder;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
+import androidx.annotation.RequiresApi;
 import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -22,28 +18,28 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.signature.ObjectKey;
 import com.example.authio.R;
 import com.example.authio.databinding.SingleUserEditBinding;
 import com.example.authio.models.Image;
 import com.example.authio.shared.Callbacks;
-import com.example.authio.shared.ErrorPredicates;
 import com.example.authio.utils.ImageUtils;
 import com.example.authio.viewmodels.ProfileFragmentViewModel;
 import com.example.authio.views.activities.MainActivity;
 import com.example.authio.models.User;
 import com.example.authio.views.custom.ErrableEditText;
+import com.example.authio.views.ui.dialogs.AuthChangeDialogFragment;
+import com.example.authio.views.ui.dialogs.EmailChangeDialogFragment;
+import com.example.authio.views.ui.dialogs.PasswordChangeDialogFragment;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-import static android.app.Activity.RESULT_OK;
-
 /**
  * A simple {@link Fragment} subclass.
  */
-public class ProfileFragment extends MainFragment {
+public class ProfileFragment extends MainFragment implements AuthChangeDialogFragment.OnDialogCriticalServerError {
 
     private ImageView profileImage;
 
@@ -58,6 +54,7 @@ public class ProfileFragment extends MainFragment {
         // Required empty public constructor
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -75,15 +72,33 @@ public class ProfileFragment extends MainFragment {
             // otherwise your UI components will become unresponsive due to finding views in a mismatching view (not that from the data binding)
 
         usernameEditText = ((ErrableEditText) view.findViewById(R.id.username_edit))
-                            .withErrorPredicate(ErrorPredicates.username);
+                            .asUsername();
         descriptionEditText = ((ErrableEditText) view.findViewById(R.id.description_edit))
-                            .withErrorPredicate(ErrorPredicates.description);
+                            .asDescription();
+
+        viewModel.setChangeEmailButtonListener((v) -> {
+            EmailChangeDialogFragment emailChangeDialogFragment = new EmailChangeDialogFragment();
+            emailChangeDialogFragment.setTargetFragment(this, 400);
+            assert getFragmentManager() != null;
+            emailChangeDialogFragment.show(getFragmentManager(), "ChangeEmail");
+        });
+
+        viewModel.setChangePasswordButtonListener((v) -> {
+            PasswordChangeDialogFragment passwordChangeDialogFragment = new PasswordChangeDialogFragment();
+            passwordChangeDialogFragment.setTargetFragment(this, 300);
+            assert getFragmentManager() != null;
+            passwordChangeDialogFragment.show(getFragmentManager(), "ChangePassword");
+        });
 
         viewModel.setConfirmChangesButtonListener((v) -> {
             // if bitmap is not null, then onActivityResult was called => pfp was changed
             if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
                 String token = prefConfig.readToken();
                 String refreshToken = prefConfig.readRefreshToken();
+
+                if(usernameEditText.setErrorTextIfError() | descriptionEditText.setErrorTextIfError()) {
+                    return;
+                }
 
                 if(bitmap != null) {
                     viewModel.uploadImage(
@@ -163,6 +178,9 @@ public class ProfileFragment extends MainFragment {
             if(responseCode.equals("ok") && (photoUrl = user.getPhotoUrl()) != null) {
                 Glide.with(this)
                         .load(photoUrl)
+                        .signature(new ObjectKey(System.currentTimeMillis() / 60 * 10 * 1000))
+                            // objectkey to give different signature to each cached image (differentiate updated pfps)
+                            // objectkey that uses different signature each 10 minutes
                         .into(profileImage); // Glide makes image loading and caching a dream - no AsyncTasks or Lrucaches here!
 
                 profileImage.setOnClickListener((v) -> {
@@ -201,5 +219,11 @@ public class ProfileFragment extends MainFragment {
                     bitmap
             ); // set the new image resource to be decoded from the bitmap
         }
+    }
+
+    @Override
+    public void onDialogCriticalServerError(String errorText) {
+        prefConfig.displayToast(errorText);
+        onAuthStateReset.performAuthReset();
     }
 }

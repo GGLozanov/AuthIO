@@ -13,7 +13,12 @@ import android.util.Log;
 
 import androidx.annotation.Nullable;
 
+import com.example.authio.utils.PrefConfig;
+import com.example.authio.views.activities.MainActivity;
+
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Objects;
 
 // TODO: Maybe rename; dumb name
 public class Callbacks {
@@ -49,4 +54,6 @@ public class Callbacks {
 
         return null;
     }
+
+   // TODO: Add DialogFragment loginToken & updateUser callback here
 }

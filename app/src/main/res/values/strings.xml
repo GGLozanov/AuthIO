@@ -13,7 +13,7 @@
     <string name="pref_token">com.example.preference_token</string>
     <string name="pref_refresh_token">com.example.preference_refresh_token</string>
 
-    <string name="email_hint">Enter e-mail</string>
+    <string name="email_hint">Enter E-mail</string>
     <string name="username_hint">Enter Username</string>
     <string name="password_hint">Enter Password</string>
     <string name="description_hint">Enter Description</string>
@@ -25,8 +25,18 @@
     <string name="login">Login</string>
     <string name="logout">Logout</string>
 
-    <string name="bn_view_users_title">View users</string> <!--bn = bottom nav-->
-    <string name="bn_view_self_title">View self</string>
+    <string name="bn_view_users_title">View Users</string> <!--bn = bottom nav-->
+    <string name="bn_view_self_title">View Self</string>
 
     <string name="confirm">Confirm</string>
+    <string name="cancel">Cancel</string>
+    <string name="confirm_fields">Confirm Fields</string>
+
+    <string name="change_password">Change\n Password</string>
+    <string name="change_email">Change\n E-mail</string>
+
+    <string name="new_email_hint">Enter New E-mail</string>
+    <string name="new_password_hint">Enter New Password</string>
+    <string name="confirm_password_hint">Confirm Password</string>
+    <string name="confirm_new_password_hint">Confirm New Password</string>
 </resources>

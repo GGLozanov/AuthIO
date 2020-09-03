@@ -10,7 +10,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:context=".views.ui.RegisterFragment">
+        tools:context=".views.ui.fragments.RegisterFragment">
 
         <!-- TODO: Update blank fragment layout -->
 

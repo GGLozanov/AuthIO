@@ -9,9 +9,8 @@ import android.util.Log;
 import com.example.authio.R;
 import com.example.authio.models.User;
 import com.example.authio.utils.PrefConfig;
-import com.example.authio.views.ui.LoginFragment;
-import com.example.authio.views.ui.RegisterFragment;
-import com.example.authio.views.ui.ProfileFragment;
+import com.example.authio.views.ui.fragments.LoginFragment;
+import com.example.authio.views.ui.fragments.RegisterFragment;
 
 import java.lang.ref.WeakReference;
 

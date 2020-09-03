@@ -7,6 +7,6 @@ import com.example.authio.models.Token;
 public class LoginFragmentViewModel extends AuthFragmentViewModel {
 
     public LiveData<Token> getLoginToken(String email, String password) {
-        return mToken = tokenRepo.getTokenOnLogin(email, password);
+        return mToken = tokenRepository.getTokenOnLogin(email, password);
     }
 }

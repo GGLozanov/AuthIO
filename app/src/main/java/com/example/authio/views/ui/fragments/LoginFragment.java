@@ -1,4 +1,4 @@
-package com.example.authio.views.ui;
+package com.example.authio.views.ui.fragments;
 
 
 import android.app.Activity;
@@ -11,18 +11,15 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
 import android.util.Log;
-import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import com.example.authio.R;
 import com.example.authio.utils.PrefConfig;
-import com.example.authio.utils.TokenUtils;
 import com.example.authio.viewmodels.LoginFragmentViewModel;
 import com.example.authio.api.OnAuthStateChanged;
 import com.example.authio.views.activities.AuthActivity;
-import com.example.authio.views.activities.MainActivity;
 
 import java.util.Objects;
 
@@ -75,10 +72,8 @@ public class LoginFragment extends AuthFragment {
         String email = Objects.requireNonNull(emailInput.getText()).toString(),
                 password = Objects.requireNonNull(passwordInput.getText()).toString();
 
-        if(emailInput.isInvalid() | passwordInput.isInvalid()) {
-            showErrorMessage("Invalid info in fields!", emailInput.wasInvalid() ?
-                            "Enter a valid e-mail" : null,
-                    passwordInput.wasInvalid() ? "Enter a (longer) password" : null);
+        if(emailInput.setErrorTextIfError() | passwordInput.setErrorTextIfError()) {
+            showErrorMessage("Invalid info in fields!");
             return;
         }
 

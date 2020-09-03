@@ -38,7 +38,7 @@
 
         <ImageView
             android:id="@+id/profile_image"
-            android:layout_width="300dp"
+            android:layout_width="280dp"
             android:layout_height="300dp"
             android:layout_margin="10dp"
             android:layout_marginStart="15dp"
