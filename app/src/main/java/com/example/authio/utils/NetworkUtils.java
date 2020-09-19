@@ -4,6 +4,7 @@ import android.util.Log;
 
 import com.example.authio.api.APIOperations;
 import com.example.authio.models.Token;
+import com.example.authio.shared.Constants;
 import com.example.authio.views.activities.MainActivity;
 
 import org.json.JSONException;
@@ -97,7 +98,7 @@ public class NetworkUtils {
                                                    Callback<Token> refreshTokenResponseCallback)
             throws JSONException, IOException, NetworkUtils.ResponseSuccessfulException, InvalidTokenException {
         String responseCode = NetworkUtils.
-                extractResponseFromResponseErrorBody(response, "response");
+                extractResponseFromResponseErrorBody(response, Constants.RESPONSE);
 
         if(responseCode == null ||
                 !responseCode.equals("Expired token. Get refresh token.")) {
@@ -125,28 +126,14 @@ public class NetworkUtils {
             String responseCode = token.getResponse();
             Log.i("Repository", "getTokenFromRefreshResponse —> Retrieved new token from refresh_token endpoint.");
 
-            if(responseCode.equals("ok")) {
+            if(responseCode.equals(Constants.SUCCESS_RESPONSE)) {
                 Log.i("Repository", "getTokenFromRefreshResponse —> New token from refresh_token endpoint is valid ('ok' status).");
 
-                String jwtToken = token.getJWT(); // new JWT
-
-                PrefConfig prefConfig;
-
-                // TODO: Try to find a way to extract sharedprefs from here and modularise app (this is an exception but try to change that)
-                if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
-                    prefConfig.writeToken(jwtToken); // refresh jwt is null here! (request doesn't contain it)
-                } else {
-                    Log.e("UserRepository", "getTokenFromRefreshResponse —> Couldn't access sharedpreferences from UserRepository");
-                    return null;
-                }
-
-                Log.i("UserRepository", "getTokenFromRefreshResponse —> New token from refresh_token endpoint is saved into sharedprefrences.");
-
-                return jwtToken;
+                return token.getJWT();
             }
         }
 
-        Log.e("UserRepository", "getTokenFromRefreshResponse —> refresh_token endpoint response unsuccessful or body is null. Returning null.");
+        Log.e("Repository", "getTokenFromRefreshResponse —> refresh_token endpoint response unsuccessful or body is null. Returning null.");
 
         return null;
     }

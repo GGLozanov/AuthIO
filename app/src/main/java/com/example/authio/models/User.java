@@ -5,39 +5,20 @@ import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.room.ColumnInfo;
+import androidx.room.Entity;
+import androidx.room.Ignore;
+import androidx.room.PrimaryKey;
 
+import com.example.authio.persistence.UserEntity;
+import com.example.authio.shared.Constants;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 // a transcribed model for an HTTP response from the Web service
 // contains 'response' (status), 'username', 'description', and 'email' (at most) in a JSON format
 // implements Parcelable in order to be sent through intents using Bundle args
-public class User extends Model implements Parcelable {
-
-    @SerializedName("id")
-    @Expose
-    @Nullable
-    private Integer id;
-
-    @SerializedName("username")
-    @Expose
-    @Nullable
-    private String username;
-
-    @SerializedName("description")
-    @Expose
-    @Nullable
-    private String description;
-
-    @SerializedName("email")
-    @Expose
-    @Nullable
-    private String email;
-
-    @SerializedName("photo_url")
-    @Expose
-    @Nullable
-    private String photoUrl;
+public class User extends CacheModel<UserEntity> implements Parcelable {
 
     /**
      * Constructor made for when user has an image (photoUrl)
@@ -50,12 +31,7 @@ public class User extends Model implements Parcelable {
      */
     public User(@Nullable Integer id, String response, @Nullable String username,
                 @Nullable String description, @Nullable String email, @Nullable String photoUrl) {
-        super(response);
-        this.id = id;
-        this.username = username;
-        this.description = description;
-        this.email = email;
-        this.photoUrl = photoUrl;
+        super(response, new UserEntity(id, username, description, email, photoUrl));
     }
 
     /**
@@ -68,11 +44,39 @@ public class User extends Model implements Parcelable {
      */
     public User(@Nullable Integer id, String response, @Nullable String username,
                 @Nullable String description, @Nullable String email) {
-        super(response);
-        this.id = id;
-        this.username = username;
-        this.description = description;
-        this.email = email;
+        super(response, new UserEntity(id, username, description, email, null));
+    }
+
+    /**
+     * Constructor made for when User is represented as a Room DB entity
+     * @param id - Given user's id
+     * @param username - Given user's username
+     * @param description - Given user's description
+     * @param email - Given user's email
+     */
+    public User(Integer id, @Nullable String username,
+                @Nullable String description, @Nullable String email) {
+        this(id, id == null || username == null || description == null || email == null ?
+                Constants.FAILED_RESPONSE : Constants.SUCCESS_RESPONSE, username, description, email);
+        // can't invoke invalid method here before object init
+    }
+
+    /**
+     * Utility constructor for representing User as a Room DB entity
+     * @param entity
+     * @param response
+     */
+    public User(UserEntity entity, String response) {
+        super(response, entity);
+    }
+
+    /**
+     * Utility constructor with a default response recorded based on the entity given
+     * @param entity
+     */
+    public User(UserEntity entity) {
+        super(entity != null && (entity.getId() <= 0 || entity.getUsername() == null || entity.getDescription() == null || entity.getEmail() == null) ?
+                Constants.FAILED_RESPONSE : Constants.SUCCESS_RESPONSE, entity);
     }
 
     /**
@@ -87,47 +91,6 @@ public class User extends Model implements Parcelable {
         return new User(response);
     }
 
-    public User(Parcel in) {
-        super(in.readString());
-        this.id = in.readInt();
-        this.username = in.readString();
-        this.description = in.readString();
-        this.email = in.readString();
-        this.photoUrl = in.readString();
-    }
-
-    public Integer getId() { return id; }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPhotoUrl() { return photoUrl; }
-
-    public void setPhotoUrl(@Nullable String photoUrl) {
-        this.photoUrl = photoUrl;
-    }
-
-    public void setUsername(@Nullable String username) {
-        this.username = username;
-    }
-
-    public void setDescription(@Nullable String description) {
-        this.description = description;
-    }
-
-    public void setEmail(@Nullable String email) {
-        this.email = email;
-    }
-
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator() { // creator used to convert parcelables to model
         public User createFromParcel(Parcel in) {
             return new User(in);
@@ -137,6 +100,10 @@ public class User extends Model implements Parcelable {
             return new User[size];
         }
     };
+
+    public User(Parcel in) {
+        super(in.readString(), in.readParcelable(UserEntity.class.getClassLoader()));
+    }
 
     @Override
     public int describeContents() {
@@ -149,30 +116,13 @@ public class User extends Model implements Parcelable {
             dest.writeString(response);
         }
 
-        if(id != null) {
-            dest.writeInt(id);
-        }
-
-        if(username != null) {
-            dest.writeString(username);
-        }
-
-        if(description != null) {
-            dest.writeString(description);
-        }
-
-        if(email != null) {
-            dest.writeString(email);
-        }
-
-        if(photoUrl != null) {
-            dest.writeString(photoUrl);
+        if(entity != null) {
+            dest.writeParcelable(entity, 0);
         }
     }
 
-    @NonNull
-    @Override
-    public String toString() {
-        return "[" + id + ", " + username + ", " + description + ", " + email + "]";
+    public boolean isInvalid() {
+        return entity == null || entity.getId() <= 0 || entity.getUsername() == null
+                || entity.getDescription() == null || entity.getEmail() == null;
     }
 }

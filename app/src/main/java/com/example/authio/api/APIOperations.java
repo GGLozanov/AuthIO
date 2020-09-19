@@ -3,6 +3,7 @@ package com.example.authio.api;
 import com.example.authio.models.Model;
 import com.example.authio.models.Token;
 import com.example.authio.models.User;
+import com.example.authio.shared.Constants;
 
 import java.util.Map;
 
@@ -29,10 +30,10 @@ public interface APIOperations {
     @POST("api/auth/register.php")
     @FormUrlEncoded
     Call<Token> performRegistration(
-            @Field("email") String email,
-            @Field("username") String username,
-            @Field("password") String password,
-            @Field("description") String description
+            @Field(Constants.EMAIL) String email,
+            @Field(Constants.USERNAME) String username,
+            @Field(Constants.PASSWORD) String password,
+            @Field(Constants.DESCRIPTION) String description
     );
 
     /**
@@ -43,8 +44,8 @@ public interface APIOperations {
      */
     @GET("api/auth/login.php")
     Call<Token> performLogin(
-            @Query("email") String email,
-            @Query("password") String password
+            @Query(Constants.EMAIL) String email,
+            @Query(Constants.PASSWORD) String password
     );
 
     /**
@@ -54,7 +55,7 @@ public interface APIOperations {
      */
     @GET("api/auth/refresh_token.php")
     Call<Token> refreshToken(
-            @Header("Authorization") String refreshJWT
+            @Header(Constants.AUTH_HEADER) String refreshJWT
     );
 
     /**
@@ -64,7 +65,7 @@ public interface APIOperations {
      */
     @GET("api/service/user_info.php")
     Call<User> getUser(
-            @Header("Authorization") String token // username inside token for DB query; token inside auth header
+            @Header(Constants.AUTH_HEADER) String token // username inside token for DB query; token inside auth header
     );
 
     /**
@@ -76,18 +77,18 @@ public interface APIOperations {
     @POST("api/service/image.php")
     @FormUrlEncoded
     Call<Model> performImageUpload(
-            @Header("Authorization") String token, // title is user id (change to integer client and server side)
+            @Header(Constants.AUTH_HEADER) String token, // title is user id (change to integer client and server side)
             @Field("image") String image
     );
 
     /**
      * GET request to fetch all other users apart from the authenticated (auth'd) one
      * @param token - JWT for the given auth user used to validate requests to secure endpoints (contains auth user's id)
-     * @return - a map of string ids and user models (no string response; if something goes awry, blame it on the user's connection)
+     * @return - a map of "user" string (+ their id - i.e. "user1") and user models (no string response; if something goes awry, blame it on the user's connection)
      */
     @GET("api/service/get_users.php")
     Call<Map<String, User>> getUsers(
-            @Header("Authorization") String token
+            @Header(Constants.AUTH_HEADER) String token
     );
 
     /**
@@ -99,7 +100,7 @@ public interface APIOperations {
     @POST("api/service/edit_user.php") // should semantically be PATCH but w/e (for now) FIXME potentially in backend
     @FormUrlEncoded
     Call<Model> editUser(
-            @Header("Authorization") String token,
+            @Header(Constants.AUTH_HEADER) String token,
             @FieldMap Map<String, String> body // variable body parameters (which is why a map is used)
     );
 

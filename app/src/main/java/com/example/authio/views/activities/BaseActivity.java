@@ -21,7 +21,6 @@ public abstract class BaseActivity extends AppCompatActivity {
         this.prefConfig = prefConfig;
     }
 
-    // TODO: Handle possible misuse/crash from this method outside of activities with context present (and onCreate ran)
     protected void replaceCurrentFragment(Fragment fragmentReplacement) {
         getSupportFragmentManager()
                 .beginTransaction()

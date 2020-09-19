@@ -1,6 +1,8 @@
 package com.example.authio.api;
 
 import com.example.authio.BuildConfig;
+import com.example.authio.adapters.UserTypeAdapter;
+import com.example.authio.models.User;
 import com.google.gson.GsonBuilder;
 
 import retrofit2.Retrofit;
@@ -23,6 +25,8 @@ public class APIClient {
                     .addConverterFactory(
                         GsonConverterFactory.create(
                             new GsonBuilder()
+                                    .serializeNulls()
+                                    .registerTypeAdapter(User.class, new UserTypeAdapter()) // register special type adapter for User GSON
                                     .setLenient().create()
                         ) // set the builder to be more lenient for 'malformed' JSON
                     ) // add a converter for HTTP responses in JSON

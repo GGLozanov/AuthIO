@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -13,6 +14,7 @@ import androidx.annotation.RequiresApi;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.authio.R;
+import com.example.authio.shared.Constants;
 import com.example.authio.shared.ErrorPredicates;
 import com.example.authio.utils.PrefConfig;
 import com.example.authio.viewmodels.ProfileFragmentViewModel;
@@ -62,49 +64,40 @@ public class PasswordChangeDialogFragment extends AuthChangeDialogFragment {
             String password = Objects.requireNonNull(passwordInput.getText()).toString();
 
             viewModel.getLoginToken(
-                    Objects.requireNonNull(viewModel.getUser().getValue()).getEmail(),
+                    Objects.requireNonNull(viewModel.getUser().getValue())
+                            .getEntity().getEmail(),
                     password
             ).observe(this, (token) -> {
                 if(token != null) {
-                    PrefConfig prefConfig;
+                    String responseCode = token.getResponse();
 
-                    // TODO: Optimise code repetition. . .
-                    if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
-                        String responseCode = token.getResponse();
+                    if(responseCode.equals(Constants.SUCCESS_RESPONSE)) {
 
-                        if(responseCode.equals("ok")) {
-                            String jwt = token.getJWT();
-                            String refreshJwt = token.getRefreshJWT();
+                        String newPassword = Objects.requireNonNull(newPasswordInput.getText()).toString();
 
-                            prefConfig.writeToken(jwt);
-                            prefConfig.writeRefreshToken(refreshJwt);
-
-                            String newPassword = Objects.requireNonNull(newPasswordInput.getText()).toString();
-
-                            viewModel.updateUser(jwt, refreshJwt, new HashMap<String, String>(){{
-                                put("password", newPassword);
-                            }}).observe(this, (result) -> {
-                                if(result.getResponse().equals("ok")) {
-                                    Log.i("PasswordChangeDFragment", "confirmButton closure —> Auth user email successfuly changed");
-                                    prefConfig.displayToast("Password successfully changed!");
-                                    dismiss();
-                                } else {
-                                    Log.w("PasswordChangeDFragment", "Failed to edit user -> " + result.getResponse());
-                                    onDialogCriticalServerError.onDialogCriticalServerError("Couldn't change email! Please login again!");
-                                }
-                            });
-                        } else if(responseCode.equals("failed")) {
-                            prefConfig.displayToast("Invalid credentials! Initial password may not be correct!");
-                            dismiss();
-                        } else {
-                            // internal server error
-                            prefConfig.displayToast("Something went wrong. Internal server error" + responseCode);
-                            onDialogCriticalServerError.onDialogCriticalServerError("Internal server error. Connection suspended.");
-                        }
+                        viewModel.updateUser(new HashMap<String, String>(){{
+                            put(Constants.PASSWORD, newPassword);
+                        }}).observe(this, (result) -> {
+                            if(result.getResponse().equals(Constants.SUCCESS_RESPONSE)) {
+                                Log.i("PasswordChangeDFragment", "confirmButton closure —> Auth user email successfuly changed");
+                                Toast.makeText(getContext(), "Password successfully changed!", Toast.LENGTH_LONG).show();
+                                dismiss();
+                            } else {
+                                Log.w("PasswordChangeDFragment", "Failed to edit user -> " + result.getResponse());
+                                onDialogCriticalServerError.onDialogCriticalServerError("Couldn't change email! Please login again!");
+                            }
+                        });
+                    } else if(responseCode.equals(Constants.FAILED_RESPONSE)) {
+                        Toast.makeText(getContext(), "Invalid credentials! Initial password may not be correct!", Toast.LENGTH_LONG).show();
+                        dismiss();
                     } else {
-                        Log.e("PasswordChangeDFragment", "No Reference to SharedPreferences found");
-                        onDialogCriticalServerError.onDialogCriticalServerError("Couldn't resolve internal app error.");
+                        // internal server error
+                        Toast.makeText(getContext(), "Something went wrong. Internal server error", Toast.LENGTH_LONG).show();
+                        onDialogCriticalServerError.onDialogCriticalServerError("Internal server error. Connection suspended.");
                     }
+                } else {
+                    Log.e("PasswordChangeDFragment", "No Reference to SharedPreferences found");
+                    onDialogCriticalServerError.onDialogCriticalServerError("Couldn't resolve internal app error.");
                 }
             });
         });

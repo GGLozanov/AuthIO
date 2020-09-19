@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.WindowManager;
 
 import com.example.authio.R;
 import com.example.authio.models.User;
@@ -24,6 +25,8 @@ public class AuthActivity extends BaseActivity implements
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_auth);
+
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
 
         // need to instantiate prefconfig reference here with derived activity-level context
         prefConfig = new PrefConfig(this);

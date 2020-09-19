@@ -1,83 +1,97 @@
-package com.example.authio.resources;
+package com.example.authio.fetchers;
 
-import androidx.annotation.MainThread;
-import androidx.annotation.WorkerThread;
+import android.util.Log;
+
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MediatorLiveData;
 
 import com.example.authio.executors.AppExecutors;
-import com.example.authio.models.CacheModel;
-import com.example.authio.persistence.BaseEntity;
-import com.example.authio.shared.Constants;
 
 /**
- * . This class takes two type parameters.
+ * Class used to fetch data for models that have both a remote and local source. Acts as a mediator between the two data sources.
+ * This class takes two type parameters.
  * They are correlating models - one Domain and one Database - and the class uses them to retrieve the necessary data
  * from either the Room cache or the network
  * The MediatorLiveData instance always returns the initial network model containing the response and Room entity
  * @param <NetworkModel>
  * @param <CacheEntity>
  */
-public abstract class NetworkBoundModelFetcher<NetworkModel extends CacheModel<CacheEntity>, CacheEntity extends BaseEntity> {
-    private AppExecutors appExecutors;
-    // this should be a networkModel return because viewmodel and view handles network model, not cache model
-    private MediatorLiveData<NetworkModel> results = new MediatorLiveData<>(); // final result from db after fetch checks and db interactions are completed
+public abstract class NetworkBoundModelFetcher<NetworkModel, CacheEntity>
+        extends NetworkBoundFetcher<NetworkModel, CacheEntity> {
 
     public NetworkBoundModelFetcher(AppExecutors appExecutorsInstance) {
-        this.appExecutors = appExecutorsInstance;
+        super(appExecutorsInstance);
+    }
+
+    @Override
+    public void fetch() {
+        Log.i("NetworkBoundMFetcher", "fetch —> Beginning to fetch model (network bound-ly)");
 
         results.setValue(null); // set initial state to loading (fetching) = null
         LiveData<CacheEntity> dbResult = loadFromDb();
 
-        if(shouldFetch()) {
-            LiveData<NetworkModel> fetchResult = fetchFromNetwork();
-            results.addSource(fetchResult, (networkModel) -> {
-                results.removeSource(fetchResult); // stop observing the network\
+        // TODO: might be useless if loadfromdb is async
+        if(dbResult == null) { // if the livedata is utterly null, there is an error which needs to be handled by the top layer of the app
+            Log.w("NetworkBoundMFetcher", "fetch —> Critical error required to be handled on top architecture layer found (most likely expired JWT). Suspend all fetch operations");
+            results.setValue(getCriticalFailureModel());
+            return;
+        }
 
-                if(networkModel.getResponse().equals(Constants.FAILED_RESPONSE)) {
-                    results.setValue(
-                            (NetworkModel) CacheModel.asFailed(Constants.FAILED_RESPONSE));
+        if(shouldFetchFromNetwork()) {
+            Log.i("NetworkBoundMFetcher", "fetch —> shouldFetch() check passed. Fetching API resource");
+            LiveData<NetworkModel> fetchResult = fetchFromNetwork();
+            results.addSource(fetchResult, networkModel -> {
+                Log.i("NetworkBoundMFetcher", "fetch —> networkFetchResult —> Received result from network & saving it to db");
+                results.removeSource(fetchResult); // stop observing the network source
+
+                if(isNetworkModelInvalid(networkModel)) {
+                    // network model is invalid (response might have failed)
+                    // load data from cache and don't listen to db or network anymore
+                    Log.i("NetworkBoundMFetcher", "fetch —> networkFetchResult —> Received result from network is invalid. Loading cache instead.");
                     results.addSource(dbResult, (dbEntity) -> {
                         // TODO: There might be needless overloading here
                         results.removeSource(dbResult); // stop listening to the db (request has failed, no need to listen for updates)
-                        results.setValue((NetworkModel) new CacheModel<>(Constants.SUCCESS_RESPONSE, dbEntity)); // reload from cache after user has received network error
+
+                        Log.i("NetworkBoundMFetcher", "fetch —> networkFetchResult —> Fetched cache from Room. Converting to network model & sending to ViewModel");
+
+                        results.setValue(entityToNetworkModel(dbEntity)); // reload from cache after user has received network error
                     });
                     return;
                 }
 
+                Log.i("NetworkBoundMFetcher", "fetch —> networkFetchResult —> Received result from network is valid. Saving to Room & listening to db for changes.");
                 // save fetched results to db
                 appExecutors.executeOnDiskIO(() -> {
-                    saveToDb(networkModel.getEntity()); // entity should be initialised by Retrofit from GSON conversion
-                });
+                    // these should always be castable (User -> UserEntity; List<User> -> List<UserEntity)
+                    saveToDb(networkModel); // entity should be initialised by Retrofit from GSON conversion
 
-                // observe db again with new method call (new information). . .
-                // wakes up once fetching has finished on I/O thread
-                results.addSource(loadFromDb(), (dbEntity) -> {
-                    results.setValue(
-                            (NetworkModel) new CacheModel<>(Constants.SUCCESS_RESPONSE, dbEntity)
-                    ); // unsafe cast; might crash
+                    appExecutors.executeOnMainThread(() -> {
+                        // observe db again with new method call (new information). . .
+                        // done when everything has been saved to db
+
+                        LiveData<CacheEntity> updatedDbResult = loadFromDb();
+
+                        if(updatedDbResult == null) {
+                            Log.w("NetworkBoundMFetcher", "fetch —> networkFetchResult —> saveToDb call —> Critical error required to be handled on top architecture layer found (most likely expired JWT). Suspend all fetch operations");
+                            results.setValue(getCriticalFailureModel());
+                            return;
+                        }
+
+                        results.addSource(updatedDbResult, (dbEntity) -> {
+                            // continue listening to changes to the db. . .
+                            Log.i("NetworkBoundMFetcher", "fetch —> networkFetchResult —> cacheResult —> Received result from db loading & using new cache as SSOT.");
+                            results.setValue(
+                                    entityToNetworkModel(dbEntity)
+                            );
+                        });
+                    });
                 });
-            });
+            }); // suppress workerthread for this use case because retrofit
         } else {
+            Log.i("NetworkBoundMFetcher", "fetch —> shouldFetch() check not passed. Loading old cached data.");
             results.addSource(dbResult, (dbEntity) -> {
-                results.setValue((NetworkModel) new CacheModel<>(Constants.SUCCESS_RESPONSE, dbEntity)); // continue observing the db for changes. . .
+                Log.i("NetworkBoundMFetcher", "fetch —> Fetched cache from Room. Converting to network model & sending to ViewModel");
+                results.setValue(entityToNetworkModel(dbEntity)); // continue observing the db for changes. . .
             });
         }
-    }
-
-    @WorkerThread
-    public abstract LiveData<NetworkModel> fetchFromNetwork(); // observe network results here and observe db once fetched
-
-    @MainThread
-    public abstract boolean shouldFetch();
-
-    @MainThread
-    public abstract LiveData<CacheEntity> loadFromDb();
-
-    @WorkerThread
-    public abstract void saveToDb(CacheEntity dbEntity);
-
-    public LiveData<NetworkModel> getAsLiveData() {
-        return results;
     }
 }

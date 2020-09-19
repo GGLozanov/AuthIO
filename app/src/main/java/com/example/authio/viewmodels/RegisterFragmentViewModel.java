@@ -1,5 +1,8 @@
 package com.example.authio.viewmodels;
 
+import android.app.Application;
+
+import androidx.annotation.NonNull;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 
@@ -11,6 +14,10 @@ import com.example.authio.repositories.ImageRepository;
 public class RegisterFragmentViewModel extends AuthFragmentViewModel {
     private ImageRepository imageRepository;
     private MutableLiveData<Model> mImage; // image response represented as model (with only response)
+
+    public RegisterFragmentViewModel(@NonNull Application application) {
+        super(application);
+    }
 
     @Override
     public void init() {
@@ -26,8 +33,8 @@ public class RegisterFragmentViewModel extends AuthFragmentViewModel {
         return mToken = tokenRepository.getTokenOnRegister(email, username, password, description);
     }
 
-    public LiveData<Model> uploadUserImage(String token, Image image) {
+    public LiveData<Model> uploadUserImage(Image image) {
         // refreshToken can be null here since whenever this method is called from RegisterFragment, there is ALWAYS a new token
-        return mImage = imageRepository.uploadImage(token, null, image);
+        return mImage = imageRepository.uploadImage(image);
     }
 }

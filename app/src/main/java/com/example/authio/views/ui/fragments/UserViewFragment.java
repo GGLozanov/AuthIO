@@ -13,6 +13,7 @@ import android.widget.ListView;
 
 import com.example.authio.R;
 import com.example.authio.adapters.UserListViewAdapter;
+import com.example.authio.shared.Constants;
 import com.example.authio.viewmodels.UserViewFragmentViewModel;
 import com.example.authio.views.activities.MainActivity;
 
@@ -33,19 +34,21 @@ public class UserViewFragment extends MainFragment {
         // Inflate the layout for this fragment
         View view =  inflater.inflate(R.layout.fragment_user_view, container, false);
 
-        UserViewFragmentViewModel userViewFragmentViewModel = new ViewModelProvider(requireActivity())
+        UserViewFragmentViewModel userViewFragmentViewModel = new ViewModelProvider(requireActivity(),
+                ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication()))
                 .get(UserViewFragmentViewModel.class);
         userViewFragmentViewModel.init();
 
         usersList = view.findViewById(R.id.users_list);
 
         if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
-            userViewFragmentViewModel.getUsers(
-                    prefConfig.readToken(), prefConfig.readRefreshToken())
+            userViewFragmentViewModel.getUsers()
                 .observe(this, (users) -> {
                     if(users != null) {
-                        if(users.size() >= 1 && users.get(0).getResponse() != null && users.get(0).getResponse().equals("Reauth")) {
+                        if(users.size() >= 1 && users.get(0).getResponse() != null && users.get(0).getResponse().equals(Constants.REAUTH_FLAG)) {
+                            // TODO: The only time this will reach here with caching is when the cache itself is empty or can't be fetched
                             // means failed response - something went wrong
+                            Log.w("UserViewFragment", "Failed users response detected. Logging out auth user.");
                             onAuthStateReset.performAuthReset();
                             prefConfig.displayToast("Your session has expired or something might be wrong. Please login again.");
                             return;
@@ -58,6 +61,9 @@ public class UserViewFragment extends MainFragment {
                             userListViewAdapter
                                     .setUsers(users);
                         }
+                        Log.i("UserViewFragment", "Updated UserViewFragment with new users: " + users);
+                    } else {
+                        Log.i("UserViewFragment", "No active users to observe.");
                     }
                 });
 

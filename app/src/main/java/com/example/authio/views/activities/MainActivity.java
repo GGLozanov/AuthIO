@@ -106,6 +106,8 @@ public class MainActivity extends BaseActivity implements OnAuthStateReset,
         prefConfig.writeLoginStatus(false);
         prefConfig.writeToken(null);
         prefConfig.writeRefreshToken(null);
+        prefConfig.resetLastUsersFetchTime(); // force to fetch back from network. . .
+        prefConfig.resetLastUserFetchTime();
 
         Intent authActivityI = new Intent(this, AuthActivity.class);
         authActivityI.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // don't add the activity to the back stack through this flag

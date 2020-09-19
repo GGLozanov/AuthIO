@@ -9,6 +9,7 @@
         android:id="@+id/users_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_centerInParent="true"
         android:divider="@android:color/transparent"
         android:dividerHeight="10dp"
         android:paddingTop="15dp"

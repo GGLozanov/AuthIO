@@ -14,8 +14,10 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import com.example.authio.R;
+import com.example.authio.shared.Constants;
 import com.example.authio.utils.PrefConfig;
 import com.example.authio.viewmodels.LoginFragmentViewModel;
 import com.example.authio.api.OnAuthStateChanged;
@@ -49,7 +51,8 @@ public class LoginFragment extends AuthFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_login, container, false);
 
-        viewModel = new ViewModelProvider(requireActivity())
+        viewModel = new ViewModelProvider(requireActivity(),
+                ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication())) // pass in application for application context
                 .get(LoginFragmentViewModel.class);
         viewModel.init();
 
@@ -82,30 +85,22 @@ public class LoginFragment extends AuthFragment {
         ((LoginFragmentViewModel) viewModel).getLoginToken(email, password)
                 .observe(this, (token) -> {
                     if(token != null) {
-                        PrefConfig prefConfig;
+                        String responseCode = token.getResponse();
 
-                        if((prefConfig = AuthActivity.PREF_CONFIG_REFERENCE.get()) != null) {
-                            String responseCode = token.getResponse();
+                        if(responseCode.equals(Constants.SUCCESS_RESPONSE)) {
 
-                            if(responseCode.equals("ok")) {
-                                String jwt = token.getJWT();
-
-                                prefConfig.writeToken(jwt);
-                                prefConfig.writeRefreshToken(token.getRefreshJWT());
-
-                                onLoginFormActivity.performAuthChange(
-                                        null // pass in empty user and get in WelcomeFragment
-                                ); // communicate w/ activity to update fragment through interface
-                            } else if(responseCode.equals("failed")) {
-                                prefConfig.displayToast("Login unsuccessful!");
-                            } else {
-                                // internal server error
-                                prefConfig.displayToast("Login: Something went wrong... " + responseCode);
-                            }
-                            // TODO: Handle more errors from API down the line here (if they emerge)
+                            onLoginFormActivity.performAuthChange(
+                                    null // pass in empty user and get in WelcomeFragment
+                            ); // communicate w/ activity to update fragment through interface
+                        } else if(responseCode.equals(Constants.FAILED_RESPONSE)) {
+                            Toast.makeText(getContext(), "Login unsuccessful!", Toast.LENGTH_LONG).show();
                         } else {
-                            Log.e("No reference", "Found no reference to sharedpreferences in LoginFragment.");
+                            // internal server error
+                            Toast.makeText(getContext(), "Login failed! Please check your connection and try again!", Toast.LENGTH_LONG).show();
                         }
+                        // TODO: Handle more errors from API down the line here (if they emerge)
+                    } else {
+                        Log.e("No reference", "Found no reference to sharedpreferences in LoginFragment.");
                     }
                 });
 

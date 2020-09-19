@@ -55,7 +55,7 @@ public class UserListViewAdapter extends ArrayAdapter<User> {
             if(userCard == null)  {
                 userHolder = new UserHolder();
                 userHolder.singleUserViewBinding = DataBindingUtil.inflate(
-                        LayoutInflater.from(getContext()), // has access to context. . . somehow?
+                        LayoutInflater.from(getContext()), // has access to context. . . because it's a view?
                         R.layout.single_user_view,
                         parent,
                         false
@@ -76,14 +76,12 @@ public class UserListViewAdapter extends ArrayAdapter<User> {
             }
 
             String photoUrl;
-            if(user != null && (photoUrl = user.getPhotoUrl()) != null)  {
+            if(user != null && (photoUrl = user.getEntity()
+                    .getPhotoUrl()) != null)  {
                 Glide.with(getContext())
                         .load(photoUrl)
+                        .placeholder(R.drawable.default_img)
                         .into(userHolder.profileImage);
-            } else {
-                userHolder.profileImage.setImageDrawable(
-                        ContextCompat.getDrawable(getContext(), R.drawable.default_img)
-                );
             }
 
             userHolder.singleUserViewBinding.setImmutableUser(user);

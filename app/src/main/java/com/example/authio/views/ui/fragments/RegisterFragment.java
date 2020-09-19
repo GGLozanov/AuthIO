@@ -18,10 +18,12 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.authio.R;
 import com.example.authio.api.APIClient;
 import com.example.authio.shared.Callbacks;
+import com.example.authio.shared.Constants;
 import com.example.authio.utils.PrefConfig;
 import com.example.authio.utils.TokenUtils;
 import com.example.authio.viewmodels.RegisterFragmentViewModel;
@@ -61,7 +63,8 @@ public class RegisterFragment extends AuthFragment {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_register, container, false);
 
-        viewModel = new ViewModelProvider(requireActivity())
+        viewModel = new ViewModelProvider(requireActivity(),
+                ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication()))
                 .get(RegisterFragmentViewModel.class);
         viewModel.init();
 
@@ -131,93 +134,79 @@ public class RegisterFragment extends AuthFragment {
         ((RegisterFragmentViewModel) viewModel).getRegisterToken(email, username, password, description)
                 .observe(this, (token) -> {
                     if(token != null) {
-                        PrefConfig prefConfig;
+                        String responseCode = token.getResponse();
 
-                        if((prefConfig = AuthActivity.PREF_CONFIG_REFERENCE.get()) != null) {
-                            String responseCode = token.getResponse();
+                        if(responseCode.equals(Constants.SUCCESS_RESPONSE)) {
+                            Log.i("RegisterFragment", "performRegister —> Writing user JWT and refresh JWT to shraredpreferences.");
 
-                            if(responseCode.equals("ok")) {
-                                String jwt = token.getJWT();
+                            int userId = TokenUtils.getTokenUserIdFromPayload(token.getJWT()); // this NEVER throws ExpiredJWTException
 
-                                Log.i("RegisterFragment", "performRegister —> Writing user JWT and refresh JWT to shraredpreferences.");
+                            // don't upload picture if it's the default
+                            User user = new User(
+                                    userId,
+                                    responseCode,
+                                    username,
+                                    description,
+                                    email
+                            );
 
-                                prefConfig.writeToken(jwt); // write & save token
-                                prefConfig.writeRefreshToken(token.getRefreshJWT()); // write & save refresh token
-
-                                int userId = TokenUtils.getTokenUserIdFromPayload(jwt);
-
-                                // don't upload picture if it's the default
-                                User user = new User(
-                                        userId,
-                                        responseCode,
-                                        username,
-                                        description,
-                                        email
-                                );
-
-                                if(profileImage.getDrawable() !=
-                                        ContextCompat.getDrawable(
-                                                Objects.requireNonNull(getContext()), R.drawable.default_img)) {
-                                    Log.i("RegisterFragment", "performRegister —> User has chosen custom picture => proceed to upload to server.");
-                                    user.setPhotoUrl(APIClient.getBaseURL() +
-                                            "uploads/" +
-                                            userId +
-                                            ".jpg");
-                                    uploadImageAndAuth(jwt, user); // go on to upload the image if the registration was successful
-                                } else {
-                                    Log.i("RegisterFragment", "performRegister —> User has chosen default picture => authenticate.");
-
-                                    onRegisterFormActivity.performAuthChange(
-                                            user
-                                    ); // switch to new activity if no image left to upload
-
-                                    // can't extract auth trigger from if/else block because the other call is inside async callback closure
-                                }
-                            } else if(responseCode.equals("exists")) {
-                                Log.w("RegisterFragment", "performRegister —> User resource already exists.");
-                                prefConfig.displayToast("User already exists!");
-                            } else if(responseCode.equals("failed")) {
-                                Log.w("RegisterFragment", "performRegister —> User resource could not be created (invalid info).");
-                                prefConfig.displayToast("Registration unsuccessful!");
+                            if(profileImage.getDrawable() !=
+                                    ContextCompat.getDrawable(
+                                            Objects.requireNonNull(getContext()), R.drawable.default_img)) {
+                                Log.i("RegisterFragment", "performRegister —> User has chosen custom picture => proceed to upload to server.");
+                                user.getEntity().setPhotoUrl(APIClient.getBaseURL() +
+                                        "uploads/" +
+                                        userId +
+                                        ".jpg");
+                                uploadImageAndAuth(user); // go on to upload the image if the registration was successful
                             } else {
-                                // internal server error
-                                Log.w("RegisterFragment", "performRegister —> Failed to create user resource to unknown issues (server error).");
-                                prefConfig.displayToast(responseCode);
+                                Log.i("RegisterFragment", "performRegister —> User has chosen default picture => authenticate.");
+
+                                onRegisterFormActivity.performAuthChange(
+                                        user
+                                ); // switch to new activity if no image left to upload
+
+                                // can't extract auth trigger from if/else block because the other call is inside async callback closure
                             }
+                        } else if(responseCode.equals(Constants.EXISTS_RESPONSE)) {
+                            Log.w("RegisterFragment", "performRegister —> User resource already exists.");
+                            Toast.makeText(getContext(), "User already exists!", Toast.LENGTH_LONG).show();
+                        } else if(responseCode.equals(Constants.FAILED_RESPONSE)) {
+                            Log.w("RegisterFragment", "performRegister —> User resource could not be created (invalid info).");
+                            Toast.makeText(getContext(), "Registration unsuccessful!", Toast.LENGTH_LONG).show();
                         } else {
-                            Log.e("RegisterFragment", "performRegister —> Found no reference to sharedpreferences in RegisterFragment.");
+                            // internal server error
+                            Log.w("RegisterFragment", "performRegister —> Failed to create user resource to unknown issues (server error).");
+                            Toast.makeText(getContext(), "Registration failed! Please check your connection and try again!", Toast.LENGTH_LONG).show();
                         }
+                    } else {
+                        Log.e("RegisterFragment", "performRegister —> Found no reference to sharedpreferences in RegisterFragment.");
                     }
                 });
     }
 
-    private void uploadImageAndAuth(String token, User user) {
+    private void uploadImageAndAuth(User user) {
         ((RegisterFragmentViewModel) viewModel).uploadUserImage(
-                token,
                 new Image(null, ImageUtils.encodeImage(bitmap)))
                 .observe(this, (response) -> {
                     // TODO: Extract handling in viewmodel (leave this to just update the UI)?
                 if(response != null) {
-                    PrefConfig prefConfig;
+                    String responseCode = response.getResponse();
 
-                    if((prefConfig = AuthActivity.PREF_CONFIG_REFERENCE.get()) != null) {
-                        String responseCode = response.getResponse();
-
-                        if(responseCode.equals("Image Uploaded")) {
-                            Log.i("RegisterFragment", "uploadImageAndAuth —> Uploaded user image. Authenticating.");
-                        } else if(responseCode.equals("Image Upload Failed")) {
-                            Log.w("RegisterFragment", "uploadImageAndAuth —> Failed to upload user image. Authenticating.");
-                            prefConfig.displayToast("Image upload failed.");
-                        } else {
-                            // internal server error
-                            Log.w("RegisterFragment", "uploadImageAndAuth —> Failed to upload user image due to unknown issues (server error). Authenticating.");
-                            prefConfig.displayToast("Couldn't upload image. " + responseCode);
-                        }
-
-                        onRegisterFormActivity.performAuthChange(
-                                user
-                        ); // switch to new activity after image is received (uploaded or failed)
+                    if(responseCode.equals(Constants.IMAGE_UPLOAD_SUCCESS_RESPONSE)) {
+                        Log.i("RegisterFragment", "uploadImageAndAuth —> Uploaded user image. Authenticating.");
+                    } else if(responseCode.equals(Constants.IMAGE_UPLOAD_FAILED_RESPONSE)) {
+                        Log.w("RegisterFragment", "uploadImageAndAuth —> Failed to upload user image. Authenticating.");
+                        Toast.makeText(getContext(), "Image upload failed.", Toast.LENGTH_LONG).show();
+                    } else {
+                        // internal server error
+                        Log.w("RegisterFragment", "uploadImageAndAuth —> Failed to upload user image due to unknown issues (server error). Authenticating.");
+                        Toast.makeText(getContext(), "Couldn't upload image. " + responseCode, Toast.LENGTH_LONG).show();
                     }
+
+                    onRegisterFormActivity.performAuthChange(
+                            user
+                    ); // switch to new activity after image is received (uploaded or failed)
                 }
         });
     }

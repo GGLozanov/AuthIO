@@ -1,9 +1,12 @@
 package com.example.authio.viewmodels;
 
 import android.app.AlertDialog;
+import android.app.Application;
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentActivity;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
@@ -13,6 +16,7 @@ import com.example.authio.models.Image;
 import com.example.authio.models.Model;
 import com.example.authio.models.Token;
 import com.example.authio.models.User;
+import com.example.authio.persistence.AppDatabase;
 import com.example.authio.repositories.ImageRepository;
 import com.example.authio.repositories.TokenRepository;
 import com.example.authio.repositories.UserRepository;
@@ -32,9 +36,9 @@ public class ProfileFragmentViewModel extends LoginFragmentViewModel {
 
     private ImageRepository imageRepository;
 
-    private View.OnClickListener confirmChangesButtonListener;
-    private View.OnClickListener changeEmailButtonListener;
-    private View.OnClickListener changePasswordButtonListener;
+    public ProfileFragmentViewModel(@NonNull Application application) {
+        super(application);
+    }
 
     public void init() {
         super.init();
@@ -42,12 +46,18 @@ public class ProfileFragmentViewModel extends LoginFragmentViewModel {
             return;
         }
 
+        Context appContext = getApplication().getApplicationContext();
+
         imageRepository = ImageRepository.getInstance();
-        userRepository = UserRepository.getInstance();
+        userRepository = UserRepository.getInstance(
+                AppDatabase.getInstance(appContext)
+                        .getUserDao(),
+                (ConnectivityManager) appContext.getSystemService(Context.CONNECTIVITY_SERVICE)
+        );
     }
 
-    public LiveData<User> fetchUser(String token, String refreshToken) {
-        return mUser = userRepository.getUser(token, refreshToken);
+    public LiveData<User> fetchUser() {
+        return mUser = userRepository.getUser();
     }
 
     public LiveData<User> setUser(User user) {
@@ -58,39 +68,15 @@ public class ProfileFragmentViewModel extends LoginFragmentViewModel {
         return mUser;
     }
 
-    public LiveData<Model> updateUser(String token, String refreshToken, Map<String, String> body) {
-        return userRepository.updateUser(token, refreshToken, body);
+    public LiveData<Model> updateUser(Map<String, String> body) {
+        return userRepository.updateUser(body);
     }
 
-    public LiveData<Model> uploadImage(String token, String refreshToken, Image image) {
-        return imageRepository.uploadImage(token, refreshToken, image);
+    public LiveData<Model> uploadImage(Image image) {
+        return imageRepository.uploadImage(image);
     }
 
     public LiveData<User> getUser() {
         return mUser;
-    }
-
-    public View.OnClickListener getConfirmChangesButtonListener() {
-        return confirmChangesButtonListener;
-    }
-
-    public void setConfirmChangesButtonListener(View.OnClickListener confirmChangesListener) {
-        this.confirmChangesButtonListener = confirmChangesListener;
-    }
-
-    public View.OnClickListener getChangeEmailButtonListener() {
-        return changeEmailButtonListener;
-    }
-
-    public void setChangeEmailButtonListener(View.OnClickListener changeEmailButtonListener) {
-        this.changeEmailButtonListener = changeEmailButtonListener;
-    }
-
-    public View.OnClickListener getChangePasswordButtonListener() {
-        return changePasswordButtonListener;
-    }
-
-    public void setChangePasswordButtonListener(View.OnClickListener changePasswordButtonListener) {
-        this.changePasswordButtonListener = changePasswordButtonListener;
     }
 }
