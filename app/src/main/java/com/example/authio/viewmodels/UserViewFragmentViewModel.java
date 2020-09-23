@@ -15,6 +15,7 @@ import com.example.authio.persistence.AppDatabase;
 import com.example.authio.repositories.UserRepository;
 
 import java.util.List;
+import java.util.logging.Handler;
 
 public class UserViewFragmentViewModel extends AndroidViewModel {
     private UserRepository userRepository;

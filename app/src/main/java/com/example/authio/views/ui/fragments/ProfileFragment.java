@@ -11,6 +11,7 @@ import androidx.databinding.DataBindingUtil;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
+import android.os.Looper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,6 +40,7 @@ import com.example.authio.views.ui.dialogs.PasswordChangeDialogFragment;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.logging.Handler;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -63,6 +65,12 @@ public class ProfileFragment extends MainFragment implements AuthChangeDialogFra
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        View fragmentView =  inflater.inflate(R.layout.fragment_profile, container, false);
+            // although the layout for the databinding should be inflated and returned,
+            // this one should not be ignored either.
+            // This is not used as the main view but is only used to access fragment-specific elements (like the ProgressBar) with findViewById
+            // and not through the include-d databinding view instantiated below
+
         ProfileFragmentViewModel viewModel = new ViewModelProvider(requireActivity(),
                 ViewModelProvider.AndroidViewModelFactory.getInstance(requireActivity().getApplication()))
                 .get(ProfileFragmentViewModel.class);
@@ -72,7 +80,7 @@ public class ProfileFragment extends MainFragment implements AuthChangeDialogFra
                 inflater, R.layout.single_user_edit, container, false);
 
         View view = binding.getRoot();
-            // always inflate this layout instead of the default one
+            // always inflate this layout instead of the default
             // when using data binding in a fragment -> this one includes the databinding config
             // otherwise your UI components will become unresponsive due to finding views in a mismatching view (not that from the data binding)
 
@@ -156,27 +164,38 @@ public class ProfileFragment extends MainFragment implements AuthChangeDialogFra
 
         if(args != null && (passedUser = args.getParcelable("user")) != null) {
             viewModel.setUser(passedUser)
-                    .observe(this, this::handleObservedUser); // set the observer for the user set livedata method
+                    .observe(this, user -> handleObservedUser(user, fragmentView)); // set the observer for the user set livedata method
         } else {
             viewModel.fetchUser()
-                    .observe(this, this::handleObservedUser); // set the observer for the user fetch livedata method
+                    .observe(this, user -> handleObservedUser(user, fragmentView)); // set the observer for the user fetch livedata method
         }
 
         return view;
     }
 
-    private void handleObservedUser(User user) {
+    private void handleObservedUser(User user, View fragmentView) {
         if(user != null) {
             fetchedUser = user;
+
+            // hide progress bar and show user profile after fetch
+            disableProgressBar(fragmentView);
+            fragmentView.findViewById(R.id.user_profile).setVisibility(View.VISIBLE);
 
             String responseCode = user.getResponse();
 
             String photoUrl;
             if(responseCode.equals(Constants.SUCCESS_RESPONSE) && (photoUrl = user.getEntity().getPhotoUrl()) != null) {
-                Glide.with(this)
-                        .load(photoUrl)
-                        .placeholder(R.drawable.default_img)
-                        .into(profileImage); // Glide makes image loading and caching a dream - no AsyncTasks or Lrucaches here!
+                if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
+                    Glide.with(this)
+                            .load(photoUrl)
+                            .signature(new ObjectKey(prefConfig.readLastUserFetchTime())) // last user fetch time includes last pfp fetch time!
+                            .placeholder(R.drawable.default_img)
+                            .into(profileImage); // Glide makes image loading and caching a dream - no AsyncTasks or Lrucaches here!
+
+                } else {
+                    Log.e("ProfileFragment", "No reference for PrefConfig found in ProfileFragment.");
+                    return;
+                }
 
                 profileImage.setOnClickListener((v) -> {
                     Log.i("ProfileFragment", "ProfileImageOnClickListener —> User is selecting their profile picture");

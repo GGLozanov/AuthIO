@@ -4,6 +4,14 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:indeterminate="true"
+        android:visibility="visible" />
+
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -11,10 +19,13 @@
         tools:visibility="visible">
 
         <include
+            android:id="@+id/user_profile"
             layout="@layout/single_user_edit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:gravity="center" />
+            android:gravity="center"
+            android:visibility="gone" />
+
     </ScrollView>
 </FrameLayout>

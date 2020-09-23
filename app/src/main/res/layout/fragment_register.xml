@@ -14,7 +14,8 @@
 
         <!-- TODO: Update blank fragment layout -->
 
-        <LinearLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintLayout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -27,24 +28,33 @@
                 android:id="@+id/register_header"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:layout_marginBottom="20dp"
+                android:layout_marginBottom="16dp"
                 android:gravity="center"
                 android:paddingLeft="15dp"
                 android:paddingRight="15dp"
                 android:text="@string/register"
                 android:textSize="36sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                app:layout_constraintBottom_toTopOf="@id/profile_image"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <ImageView
                 android:id="@+id/profile_image"
                 android:layout_width="280dp"
                 android:layout_height="300dp"
-                android:layout_gravity="center"
-                android:layout_marginBottom="10dp"
+                android:layout_marginTop="16dp"
+                android:layout_marginBottom="16dp"
                 android:cropToPadding="true"
                 android:scaleType="centerCrop"
                 android:visibility="visible"
+                app:layout_constrainedHeight="true"
+                app:layout_constrainedWidth="true"
+                app:layout_constraintBottom_toTopOf="@id/error_text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/register_header"
                 app:srcCompat="@drawable/default_img"
                 tools:src="@drawable/default_img"
                 tools:srcCompat="@drawable/default_img"
@@ -54,88 +64,112 @@
                 android:id="@+id/error_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
                 android:gravity="center"
                 android:text="@string/register"
                 android:textColor="#FF0000	"
                 android:textSize="24sp"
                 android:textStyle="bold"
-                android:visibility="gone" />
+                android:visibility="gone"
+                app:layout_constraintBottom_toTopOf="@id/email_input_field"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/profile_image" />
 
             <com.example.authio.views.custom.ErrableEditText
                 android:id="@+id/email_input_field"
                 style="@style/EditTextTheme"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_marginBottom="16dp"
                 android:ems="10"
                 android:hint="@string/email_hint"
                 android:inputType="textMultiLine|textEmailAddress"
                 android:maxLines="2"
-                android:singleLine="true" />
+                android:singleLine="true"
+                app:layout_constraintBottom_toTopOf="@id/password_input_field"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/error_text" />
 
             <com.example.authio.views.custom.ErrableEditText
                 android:id="@+id/password_input_field"
                 style="@style/EditTextTheme"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_marginBottom="16dp"
                 android:ems="10"
                 android:hint="@string/password_hint"
                 android:inputType="textMultiLine|textPassword"
                 android:maxLines="2"
-                android:singleLine="true" />
+                android:singleLine="true"
+                app:layout_constraintBottom_toTopOf="@id/username_input_field"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/email_input_field" />
 
             <com.example.authio.views.custom.ErrableEditText
                 android:id="@+id/username_input_field"
                 style="@style/EditTextTheme"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_marginBottom="16dp"
                 android:ems="10"
                 android:hint="@string/username_hint"
                 android:inputType="textMultiLine|textPersonName|textCapSentences"
                 android:maxLines="2"
-                android:singleLine="true" />
+                android:singleLine="true"
+                app:layout_constraintBottom_toTopOf="@id/description_input_field"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/password_input_field" />
 
             <com.example.authio.views.custom.ErrableEditText
                 android:id="@+id/description_input_field"
                 style="@style/EditTextTheme"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_marginBottom="16dp"
                 android:ems="10"
                 android:hint="@string/description_hint"
                 android:inputType="textMultiLine|textPersonName|textCapSentences"
                 android:maxLines="2"
-                android:singleLine="true" />
+                android:singleLine="true"
+                app:layout_constraintBottom_toTopOf="@id/auth_button"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/username_input_field" />
 
             <Button
                 android:id="@+id/auth_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center|center_horizontal"
-                android:layout_marginTop="20dp"
+                android:layout_marginBottom="16dp"
                 android:background="@drawable/round_button"
                 android:drawableStart="@drawable/ic_check_white_24dp"
+                android:drawableLeft="@drawable/ic_check_white_24dp"
                 android:padding="10dp"
                 android:text="@string/register"
                 android:textSize="18sp"
-                android:drawableLeft="@drawable/ic_check_white_24dp" />
+                app:layout_constraintBottom_toTopOf="@id/toggle_text"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/description_input_field" />
 
             <TextView
                 android:id="@+id/toggle_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_marginTop="20dp"
                 android:gravity="center"
                 android:padding="5dp"
                 android:text="@string/have_account_hint"
                 android:textSize="18sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/auth_button" />
 
-        </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
     </FrameLayout>
 </ScrollView>

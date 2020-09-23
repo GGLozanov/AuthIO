@@ -15,6 +15,7 @@ import java.security.spec.X509EncodedKeySpec;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
 
 public class TokenUtils {
     /**
@@ -22,7 +23,7 @@ public class TokenUtils {
      * @param jwtToken - JWT whose payload is to be decoded and parsed
      * @return
      */
-    public static int getTokenUserIdFromPayload(String jwtToken) throws ExpiredJwtException {
+    public static int getTokenUserIdFromPayload(String jwtToken) throws ExpiredJwtException, MalformedJwtException {
         RSAPublicKey rsaPublicKey;
         try {
             byte[] decodedPublicKey = Base64.decode(BuildConfig.JWT_PUBLIC_KEY, Base64.DEFAULT);
@@ -46,11 +47,11 @@ public class TokenUtils {
         int authId;
         try {
             authId = TokenUtils.getTokenUserIdFromPayload(prefConfig.readToken());
-        } catch(ExpiredJwtException e) {
+        } catch(ExpiredJwtException | MalformedJwtException e) {
             Log.w("UserRepository" , "getUsers —> User's token is expired & id cannot be retrieved. Attempting to get id from refresh token.");
             try {
                 authId = TokenUtils.getTokenUserIdFromPayload(prefConfig.readRefreshToken());
-            } catch(ExpiredJwtException x) {
+            } catch(ExpiredJwtException | MalformedJwtException x) {
                 Log.w("UserRepository" , "getUsers —> User needs to reauth. " +
                         "This method will suspend and the user will be logged out after the REAUTH_FLAG response has been handled from the network entity.");
                 return 0;

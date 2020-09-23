@@ -11,9 +11,11 @@ import androidx.core.content.ContextCompat;
 import androidx.databinding.DataBindingUtil;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.signature.ObjectKey;
 import com.example.authio.R;
 import com.example.authio.databinding.SingleUserViewBinding;
 import com.example.authio.models.User;
+import com.example.authio.utils.PrefConfig;
 
 import java.util.List;
 
@@ -80,6 +82,9 @@ public class UserListViewAdapter extends ArrayAdapter<User> {
                     .getPhotoUrl()) != null)  {
                 Glide.with(getContext())
                         .load(photoUrl)
+                        .signature(new ObjectKey(
+                                new PrefConfig(getContext()) // singleton prefconfig with this context (TODO: Maybe fix?)
+                                .readLastUsersFetchTime()))
                         .placeholder(R.drawable.default_img)
                         .into(userHolder.profileImage);
             }

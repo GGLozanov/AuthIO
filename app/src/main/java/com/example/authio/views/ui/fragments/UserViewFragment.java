@@ -2,6 +2,7 @@ package com.example.authio.views.ui.fragments;
 
 import android.os.Bundle;
 
+import androidx.annotation.RequiresApi;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 
@@ -10,12 +11,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.example.authio.R;
 import com.example.authio.adapters.UserListViewAdapter;
 import com.example.authio.shared.Constants;
 import com.example.authio.viewmodels.UserViewFragmentViewModel;
 import com.example.authio.views.activities.MainActivity;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -54,6 +57,10 @@ public class UserViewFragment extends MainFragment {
                             return;
                         }
 
+                        // hide progress bar and show user list
+                        disableProgressBar(view);
+                        usersList.setVisibility(View.VISIBLE);
+
                         UserListViewAdapter userListViewAdapter;
                         if((userListViewAdapter = (UserListViewAdapter) usersList.getAdapter()) == null) {
                             usersList.setAdapter(new UserListViewAdapter(getContext(), R.layout.single_user_view, users));
@@ -66,7 +73,6 @@ public class UserViewFragment extends MainFragment {
                         Log.i("UserViewFragment", "No active users to observe.");
                     }
                 });
-
         } else {
             Log.e("UserViewFragment", "Found no reference to sharedpreferences in UserViewFragment.");
         }

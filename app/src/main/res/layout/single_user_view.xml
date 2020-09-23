@@ -3,12 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!--FIXME: fix this cheaty architecture and use only one variable
-        FIXME (while keeping LiveData support from ViewModel and passing in immutable user instance for reading)-->
     <data>
         <variable
             name="immutableUser"
-            type="com.example.authio.models.User" /> <!--Used when setting ListView  after being fetched by network-->
+            type="com.example.authio.models.User" /> <!--Used when setting ListView after being fetched by network/db-->
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout
