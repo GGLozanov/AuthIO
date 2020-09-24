@@ -10,6 +10,11 @@
         <item name="android:colorBackground">@color/colorPrimary</item>
         <item name="android:textColor">@color/white</item>
         <item name="editTextStyle">@style/EditTextTheme</item>
+        <item name="actionBarStyle">@style/ActionBarTheme</item>
+    </style>
+
+    <style name="ActionBarTheme" parent="@style/Widget.AppCompat.Light.ActionBar">
+        <item name="background">@color/colorPrimaryDark</item>
     </style>
 
     <style name="EditTextTheme" parent="Widget.AppCompat.EditText">
@@ -19,6 +24,14 @@
         <item name="android:editTextColor">@color/white</item>
         <item name="android:textColor">@color/white</item>
         <item name="android:backgroundTint">@color/white</item>
+    </style>
+
+    <style name="BottomNavigationItemActiveTextAppearance">
+        <item name="android:textColor">@color/colorBackground</item>
+    </style>
+
+    <style name="BottomNavigationItemInactiveTextAppearance">
+        <item name="android:textColor">@color/white</item>
     </style>
 
 </resources>

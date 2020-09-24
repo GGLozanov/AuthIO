@@ -1,35 +1,48 @@
 package com.example.authio.views.activities;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.Fragment;
+import androidx.viewpager.widget.ViewPager;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import com.example.authio.R;
-import com.example.authio.api.OnAuthStateChanged;
+import com.example.authio.adapters.FragmentPagerAdapter;
+import com.example.authio.api.OnAuthStateReset;
 import com.example.authio.utils.PrefConfig;
-import com.example.authio.models.User;
-import com.example.authio.views.ui.LoginFragment;
-import com.example.authio.views.ui.RegisterFragment;
-import com.example.authio.views.ui.WelcomeFragment;
+import com.example.authio.views.ui.fragments.ProfileFragment;
+import com.example.authio.views.ui.fragments.UserViewFragment;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import java.lang.ref.WeakReference;
 
-// TODO: Separate into AuthActivity and MainActivity
-public class MainActivity extends AppCompatActivity implements
-        LoginFragment.OnLoginFormActivity, RegisterFragment.OnRegisterFormActivity, OnAuthStateChanged {
+public class MainActivity extends BaseActivity implements OnAuthStateReset,
+        BottomNavigationView.OnNavigationItemSelectedListener, ViewPager.OnPageChangeListener {
 
-    public static WeakReference<PrefConfig> PREF_CONFIG_REFERENCE; // weak reference due to requiring activity context => avoid memory leak
-    PrefConfig prefConfig;
+    private BottomNavigationView bottomNavigationView;
+    private MenuItem currentItem;
+    private ViewPager viewPager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        PREF_CONFIG_REFERENCE = new WeakReference<>(new PrefConfig(this));
+
+        bottomNavigationView = findViewById(R.id.bottom_nav);
+        bottomNavigationView.setOnNavigationItemSelectedListener(this);
+
+        viewPager = findViewById(R.id.view_pager);
+
+        viewPager.setOffscreenPageLimit(2); // 2 pages max with saved state in-between
+        viewPager.addOnPageChangeListener(this);
+
+        // need to instantiate prefconfig reference here with derived activity-level context
+        prefConfig = new PrefConfig(this);
+        PREF_CONFIG_REFERENCE = new WeakReference<>(prefConfig);
 
         // TODO: Safeguard fragment instances with findFragmentByTag() calls before
         if(findViewById(R.id.fragment_container) != null) {
@@ -39,63 +52,88 @@ public class MainActivity extends AppCompatActivity implements
                 return;
             }
 
-            if((prefConfig = PREF_CONFIG_REFERENCE.get()) != null) {
-                if(prefConfig.readLoginStatus()) {
-                    // auth'd
-                    replaceCurrentFragment(new WelcomeFragment());
-                    // add the Welcome fragment to the container
-                } else {
-                    // not auth'd
-                    replaceCurrentFragment(new LoginFragment());
-                    // add the Login fragment to the container (always commit transactions)
-                }
-            } else {
-                Log.e("No reference", "Found no reference to sharedpreferences in MainActivity.");
-                replaceCurrentFragment(new LoginFragment());
-            }
+            FragmentPagerAdapter fragmentPagerAdapter = new FragmentPagerAdapter(getSupportFragmentManager(), 0);
+
+            Bundle bundle = getIntent().getExtras();
+
+            ProfileFragment profileFragment = new ProfileFragment();
+            profileFragment.setArguments(bundle); // contains user instance; set the intent extras as fragment args
+
+            fragmentPagerAdapter.addFragment(profileFragment);
+            fragmentPagerAdapter.addFragment(new UserViewFragment());
+
+            viewPager.setAdapter(fragmentPagerAdapter);
         }
     }
 
-    private void replaceCurrentFragment(Fragment fragmentReplacement) {
-        getSupportFragmentManager()
-                .beginTransaction()
-                .replace(R.id.fragment_container, fragmentReplacement).commitNow();
-    }
-
+    @Override
+    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {}
 
     @Override
-    public void performAuthChange(User user) {
-        prefConfig.writeLoginStatus(true);
+    public void onPageScrollStateChanged(int state) {}
 
-        Bundle args = new Bundle();
-        args.putParcelable("user", user);
+    @Override
+    public void onPageSelected(int position) {
+        Menu bottomNavMenu = bottomNavigationView.getMenu();
 
-        WelcomeFragment welcomeFragment = new WelcomeFragment();
-        welcomeFragment.setArguments(args); // pass the user through bundle (key-value) args...
+        if(currentItem != null) { // if there is an existing item chosen
+            currentItem.setChecked(false); // deselect it
+        } else {
+            bottomNavMenu.getItem(0).setChecked(false); // deselect the default one (first)
+        }
 
-        replaceCurrentFragment(welcomeFragment);
+        currentItem = bottomNavMenu.getItem(position);
+
+        currentItem.setChecked(true);
+    }
+
+    @Override
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+        switch(item.getItemId()) {
+            case R.id.action_view_self:
+                viewPager.setCurrentItem(0);
+                break;
+            case R.id.action_view_users:
+                viewPager.setCurrentItem(1);
+                break;
+        }
+
+        return false;
     }
 
     @Override
     public void performAuthReset() {
         prefConfig.writeLoginStatus(false);
         prefConfig.writeToken(null);
+        prefConfig.writeRefreshToken(null);
+        prefConfig.resetLastUsersFetchTime(); // force to fetch back from network. . .
+        prefConfig.resetLastUserFetchTime();
 
-        replaceCurrentFragment(new LoginFragment());
-    }
-
-    @Override
-    public void performToggleToRegister() {
-        replaceCurrentFragment(new RegisterFragment());
-    }
-
-    @Override
-    public void performToggleToLogin() {
-        replaceCurrentFragment(new LoginFragment());
+        Intent authActivityI = new Intent(this, AuthActivity.class);
+        authActivityI.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK); // don't add the activity to the back stack through this flag
+        startActivity(authActivityI);
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data); // necessary override for fragment onActiviyResult. . .
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.menu_appbar, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch(item.getItemId()) { // common convention to use switch w/ menus. . .
+            case R.id.action_logout:
+                performAuthReset();
+                break;
+        }
+
+        return true;
     }
 }
