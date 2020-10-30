@@ -8,6 +8,7 @@ import com.example.authio.shared.Constants;
 import java.util.Map;
 
 import retrofit2.Call;
+import retrofit2.http.DELETE;
 import retrofit2.http.Field;
 import retrofit2.http.FieldMap;
 import retrofit2.http.FormUrlEncoded;
@@ -102,6 +103,11 @@ public interface APIOperations {
     Call<Model> editUser(
             @Header(Constants.AUTH_HEADER) String token,
             @FieldMap Map<String, String> body // variable body parameters (which is why a map is used)
+    );
+
+    @DELETE("api/service/delete_user.php")
+    Call<Model> deleteUser(
+            @Header(Constants.AUTH_HEADER) String token
     );
 
     /*

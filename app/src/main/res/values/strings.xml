@@ -33,9 +33,11 @@
 
     <string name="change_password">Change\n Password</string>
     <string name="change_email">Change\n E-mail</string>
+    <string name="delete_account">Delete Account</string>
 
     <string name="new_email_hint">Enter New E-mail</string>
     <string name="new_password_hint">Enter New Password</string>
     <string name="confirm_password_hint">Confirm Password</string>
     <string name="confirm_new_password_hint">Confirm New Password</string>
+
 </resources>

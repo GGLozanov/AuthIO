@@ -60,7 +60,7 @@ public class PrefConfig {
     }
 
     public long readLastUsersFetchTime() {
-        return sharedPreferences.getInt(context.getString(R.string.pref_last_users_fetch_time), 0);
+        return sharedPreferences.getInt(context.getString(R.string.pref_last_users_fetch_time), (int) System.currentTimeMillis()); // return different default value for ObjectKey cache (always fetch)
     }
 
 
@@ -77,7 +77,7 @@ public class PrefConfig {
     }
 
     public long readLastUserFetchTime() {
-        return sharedPreferences.getInt(context.getString(R.string.pref_last_user_fetch_time), 0);
+        return sharedPreferences.getInt(context.getString(R.string.pref_last_user_fetch_time), (int) System.currentTimeMillis()); // return different default value for Glide ObjectKey cache (always fetch)
     }
 
 

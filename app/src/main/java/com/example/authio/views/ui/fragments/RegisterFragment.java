@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.os.Bundle;
 
@@ -141,7 +142,6 @@ public class RegisterFragment extends AuthFragment {
 
                             int userId = TokenUtils.getTokenUserIdFromPayload(token.getJWT()); // this NEVER throws ExpiredJWTException
 
-                            // don't upload picture if it's the default
                             User user = new User(
                                     userId,
                                     responseCode,
@@ -150,9 +150,10 @@ public class RegisterFragment extends AuthFragment {
                                     email
                             );
 
-                            if(profileImage.getDrawable() !=
-                                    ContextCompat.getDrawable(
-                                            Objects.requireNonNull(getContext()), R.drawable.default_img)) {
+                            // don't upload picture if it's the default
+                            if(((BitmapDrawable) profileImage.getDrawable()).getBitmap() !=
+                                    ((BitmapDrawable) Objects.requireNonNull(ContextCompat.getDrawable(
+                                            Objects.requireNonNull(getContext()), R.drawable.default_img))).getBitmap()) {
                                 Log.i("RegisterFragment", "performRegister —> User has chosen custom picture => proceed to upload to server.");
                                 user.getEntity().setPhotoUrl(APIClient.getBaseURL() +
                                         "uploads/" +

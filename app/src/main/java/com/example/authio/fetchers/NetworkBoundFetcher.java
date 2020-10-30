@@ -21,7 +21,7 @@ public abstract class NetworkBoundFetcher<NetworkModel, CacheEntity> {
     @MainThread
     public abstract void fetch(); // main method for fetching called after constructor & overloaded by all child classes
 
-    @WorkerThread
+    @MainThread // MainThread since threading is handled by Retrofit
     public abstract LiveData<NetworkModel> fetchFromNetwork(); // observe network results here and observe db once fetched
 
     @MainThread

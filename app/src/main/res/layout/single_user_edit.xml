@@ -28,12 +28,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:layout_margin="10dp"
                 android:ems="10"
                 android:hint="@string/username_hint"
                 android:inputType="textMultiLine|textPersonName|textCapSentences"
                 android:maxLines="1"
-                android:paddingBottom="10dp"
                 android:singleLine="true"
                 android:text="@{viewmodel.user.entity.username}"
                 android:textSize="18sp"
@@ -69,12 +67,11 @@
                 style="@style/EditTextTheme"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_margin="10dp"
+                android:layout_marginBottom="8dp"
                 android:ems="10"
                 android:hint="@string/description_hint"
                 android:inputType="textMultiLine|textPersonName|textCapSentences"
                 android:maxLines="1"
-                android:paddingBottom="10dp"
                 android:singleLine="true"
                 android:text="@{viewmodel.user.entity.description}"
                 android:textSize="18sp"
@@ -87,6 +84,7 @@
                 android:id="@+id/confirm_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="4dp"
                 android:layout_marginBottom="8dp"
                 android:background="@drawable/round_button"
                 android:drawableStart="@drawable/ic_check_white_24dp"
@@ -109,13 +107,14 @@
                 android:baselineAligned="false"
                 android:orientation="horizontal"
                 android:padding="5dp"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/delete_button"
                 app:layout_constraintEnd_toStartOf="parent"
                 app:layout_constraintStart_toEndOf="parent"
                 app:layout_constraintTop_toBottomOf="@id/confirm_button">
 
                 <Button
                     android:id="@+id/change_email"
+                    style='style="?android:attr/buttonBarButtonStyle"'
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
@@ -135,6 +134,7 @@
 
                 <Button
                     android:id="@+id/change_password"
+                    style='style="?android:attr/buttonBarButtonStyle"'
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginLeft="10dp"
@@ -152,6 +152,24 @@
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/description_edit" />
             </LinearLayout>
+
+            <Button
+                android:id="@+id/delete_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/round_button"
+                android:drawableStart="@drawable/ic_baseline_delete_forever_24"
+                android:drawableLeft="@drawable/ic_baseline_delete_forever_24"
+                android:paddingLeft="15dp"
+                android:paddingRight="15dp"
+                android:text="@string/delete_account"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@id/auth_buttons" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 </layout>

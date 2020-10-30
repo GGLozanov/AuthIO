@@ -51,6 +51,8 @@ public class UserRepository extends CacheRepository<UserDao> { // designed to ma
         return instance;
     }
 
+    // TODO: Try and find a way to generify handleFailedAuthorizedResponse while keeping recursive implementation w/ different methods
+
     /**
      * The below methods are used for fetching Users from the backend.
      * They don't receive JWTs as arguments but instead get them directly from sharedpreferences.
@@ -238,7 +240,7 @@ public class UserRepository extends CacheRepository<UserDao> { // designed to ma
                                     public void onFailure(Call<Token> call, Throwable t) {
                                         Log.e("UserRepository", "getUsers —> Server error on new token retrieval. Reauth + error message.");
                                         mUsers.setValue(new ArrayList<>(
-                                                Collections.singletonList(User.asFailed("Reauth"))
+                                                Collections.singletonList(User.asFailed(Constants.REAUTH_FLAG))
                                         ));
                                     }
                                 });
@@ -426,6 +428,72 @@ public class UserRepository extends CacheRepository<UserDao> { // designed to ma
         }
 
         Log.w("UserRepository", "updateUser —> No sharedprefs reference found in MainActivity. Aborting any and all fetch operations.");
+        return null;
+    }
+
+    /**
+     *
+     */
+    // TODO: Fix code repetition in functions with only Model returns
+    public MutableLiveData<Model> deleteUser() {
+        PrefConfig prefConfig;
+        if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
+            Call<Model> deleteUserResult = API_OPERATIONS.deleteUser(prefConfig.readToken());
+
+            final MutableLiveData<Model> mModel = new MutableLiveData<>();
+            deleteUserResult.enqueue(new Callback<Model>() {
+                @Override
+                public void onResponse(Call<Model> call, Response<Model> response) {
+                    Model model;
+                    if(response.isSuccessful() && (model = response.body()) != null) {
+                        Log.i("UserRepository", "deleteUser —> Retrieved response from backend for user deletion and setting it to LiveData instance.");
+                        mModel.setValue(model);
+                        return;
+                    }
+
+                    Log.w("UserRepository", "deleteUser —> Couldn't delete user (response not successful or body is null). Handling failed delete response");
+
+                    try {
+                        NetworkUtils.handleFailedAuthorizedResponse(API_OPERATIONS, response, prefConfig.readRefreshToken(), new Callback<Token>() {
+                            @Override
+                            public void onResponse(Call<Token> call, Response<Token> response) {
+                                String jwtToken;
+                                if((jwtToken = NetworkUtils.getTokenFromRefreshResponse(response)) != null) {
+                                    Log.i("UserRepository", "deleteUser —> Retrieved new token from refresh_token endpoint. Saving new token and retrying delete_user request");
+                                    prefConfig.writeToken(jwtToken);
+                                    deleteUser();
+                                } else {
+                                    Log.i("UserRepository", "deleteUser —> Retrieved new token from refresh_token endpoint but token is either invalid or expired. Reauth.");
+                                    mModel.setValue(Model.asFailed(response.message()));
+                                }
+                            }
+
+                            @Override
+                            public void onFailure(Call<Token> call, Throwable t) {
+                                Log.e("UserRepository", "deleteUser —> Server error on new token retrieval. Reauth + error message.");
+                                mModel.setValue(Model.asFailed(t.getMessage()));
+                            }
+                        });
+                    } catch (JSONException | IOException | NetworkUtils.ResponseSuccessfulException e) {
+                        Log.e("UserRepository", "deleteUser —> UserRepository JSON parse for failed get_users response failed or response was successful. " + e.toString());
+                    } catch(NetworkUtils.InvalidTokenException e) {
+                        Log.e("UserRepository", "deleteUser —> Response status from failed user response was invalid (server-side response for invalid token or expiry). Reauth.");
+                    } finally {
+                        mModel.setValue(Model.asFailed(response.message()));
+                    }
+                }
+
+                @Override
+                public void onFailure(Call<Model> call, Throwable t) {
+                    Log.e("UserRepository", "deleteUser —> Server error on delete user attempt. Reauth + error message.");
+                    mModel.setValue(Model.asFailed(t.getMessage()));
+                }
+            });
+
+            return mModel;
+        }
+
+        Log.w("UserRepository", "deleteUser —> No sharedprefs reference found in MainActivity. Aborting any and all fetch operations.");
         return null;
     }
 }

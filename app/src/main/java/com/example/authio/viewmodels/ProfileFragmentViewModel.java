@@ -72,6 +72,10 @@ public class ProfileFragmentViewModel extends LoginFragmentViewModel {
         return userRepository.updateUser(body);
     }
 
+    public LiveData<Model> deleteUser() {
+        return userRepository.deleteUser();
+    }
+
     public LiveData<Model> uploadImage(Image image) {
         return imageRepository.uploadImage(image);
     }
