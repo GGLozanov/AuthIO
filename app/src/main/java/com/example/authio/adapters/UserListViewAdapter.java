@@ -1,5 +1,6 @@
 package com.example.authio.adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -77,19 +78,24 @@ public class UserListViewAdapter extends ArrayAdapter<User> {
                 userHolder = (UserHolder) userCard.getTag();
             }
 
-            String photoUrl;
-            if(user != null && (photoUrl = user.getEntity()
-                    .getPhotoUrl()) != null)  {
-                Glide.with(getContext())
-                        .load(photoUrl)
-                        .signature(new ObjectKey(
-                                new PrefConfig(getContext()) // singleton prefconfig with this context (TODO: Maybe fix?)
-                                .readLastUsersFetchTime()))
-                        .placeholder(R.drawable.default_img)
-                        .into(userHolder.profileImage);
+            if(user != null) {
+                String photoUrl;
+                if((photoUrl = user.getEntity().getPhotoUrl()) != null) {
+                    Glide.with(getContext())
+                            .load(photoUrl)
+                            .signature(new ObjectKey(
+                                    new PrefConfig(getContext()) // singleton prefconfig with this context (TODO: Maybe fix?)
+                                            .readLastUsersFetchTime()))
+                            .placeholder(R.drawable.default_img)
+                            .into(userHolder.profileImage);
+                } else {
+                    Glide.with(getContext())
+                            .load(R.drawable.default_img)
+                            .into(userHolder.profileImage);
+                }
+                userHolder.singleUserViewBinding.setImmutableUser(user);
             }
 
-            userHolder.singleUserViewBinding.setImmutableUser(user);
         }
 
         return userCard;

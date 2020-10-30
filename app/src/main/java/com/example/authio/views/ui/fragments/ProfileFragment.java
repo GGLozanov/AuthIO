@@ -96,12 +96,14 @@ public class ProfileFragment extends MainFragment implements AuthChangeDialogFra
             assert getFragmentManager() != null;
             emailChangeDialogFragment.show(getFragmentManager(), "ChangeEmail");
         });
+
         view.findViewById(R.id.change_password).setOnClickListener((v) -> {
             PasswordChangeDialogFragment passwordChangeDialogFragment = new PasswordChangeDialogFragment();
             passwordChangeDialogFragment.setTargetFragment(this, 300);
             assert getFragmentManager() != null;
             passwordChangeDialogFragment.show(getFragmentManager(), "ChangePassword");
         });
+
         view.findViewById(R.id.confirm_button).setOnClickListener((v) -> {
             // if bitmap is not null, then onActivityResult was called => pfp was changed
 
@@ -136,7 +138,12 @@ public class ProfileFragment extends MainFragment implements AuthChangeDialogFra
                     .observe(this, (result) -> {
                         if(result.getResponse().equals(Constants.SUCCESS_RESPONSE)) {
                             // TODO: Update user LiveData or not? Wakes up unnecessary observers but can help with possible future observers outside this fragment
-                            Toast.makeText(getContext(), "User successfully updated", Toast.LENGTH_LONG).show();
+                            // TODO: Is shared user instance in viewmodel even updated with the new data?
+                            //  Will update with next network call but won't be reflected in initial fetch
+                            Log.i("ProfileFragment", "User successfully updated -> " + result.getResponse());
+                            Log.w("ProfileFragment", "Failed to edit user -> " + result.getResponse());
+
+                            Toast.makeText(getContext(), "User successfully updated!", Toast.LENGTH_LONG).show();
                             v.setEnabled(false); // disable button (antispam)
                             v.postDelayed(() -> // append delayed message to internal handler's message queue to reenable the button
                                     v.setEnabled(true), 1000*5); // reenable after delay
@@ -152,11 +159,37 @@ public class ProfileFragment extends MainFragment implements AuthChangeDialogFra
             }
         });
 
+        view.findViewById(R.id.delete_button).setOnClickListener((v) -> {
+            viewModel.deleteUser()
+                    .observe(this, (result) -> {
+                        if(result.getResponse().equals(Constants.SUCCESS_RESPONSE)) {
+                            Log.i("ProfileFragment", "User successfully deleted -> " + result.getResponse());
+                            Toast.makeText(getContext(), "User successfully deleted!", Toast.LENGTH_LONG).show();
+                        } else {
+                            Log.w("ProfileFragment", "Failed to edit user -> " + result.getResponse());
+                            Toast.makeText(getContext(),
+                                    "Couldn't delete user! Please check your connection or try logging in again!",
+                                    Toast.LENGTH_LONG).show();
+                        }
+
+                        onAuthStateReset.performAuthReset();
+                    });
+        });
+
         // binding lifecycle config
         binding.setLifecycleOwner(this); // important for livedata (due to it being lifecycle aware)
         binding.setViewmodel(viewModel); // set the property in the data-bound xml as to access its props there
 
         profileImage = view.findViewById(R.id.profile_image);
+
+        profileImage.setOnClickListener((v) -> {
+            Log.i("ProfileFragment", "ProfileImageOnClickListener —> User is selecting their profile picture");
+
+            Intent selectImageIntent = new Intent();
+            selectImageIntent.setType("image/*");
+            selectImageIntent.setAction(Intent.ACTION_GET_CONTENT);
+            startActivityForResult(selectImageIntent, IMG_REQUEST_CODE);
+        }); // set the ability for user to change their pfp now
 
         // user fetch
         Bundle args = getArguments();
@@ -183,9 +216,9 @@ public class ProfileFragment extends MainFragment implements AuthChangeDialogFra
 
             String responseCode = user.getResponse();
 
-            String photoUrl;
-            if(responseCode.equals(Constants.SUCCESS_RESPONSE) && (photoUrl = user.getEntity().getPhotoUrl()) != null) {
-                if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null) {
+            if(responseCode.equals(Constants.SUCCESS_RESPONSE)) {
+                String photoUrl;
+                if((prefConfig = MainActivity.PREF_CONFIG_REFERENCE.get()) != null && (photoUrl = user.getEntity().getPhotoUrl()) != null) {
                     Glide.with(this)
                             .load(photoUrl)
                             .signature(new ObjectKey(prefConfig.readLastUserFetchTime())) // last user fetch time includes last pfp fetch time!
@@ -196,15 +229,6 @@ public class ProfileFragment extends MainFragment implements AuthChangeDialogFra
                     Log.e("ProfileFragment", "No reference for PrefConfig found in ProfileFragment.");
                     return;
                 }
-
-                profileImage.setOnClickListener((v) -> {
-                    Log.i("ProfileFragment", "ProfileImageOnClickListener —> User is selecting their profile picture");
-
-                    Intent selectImageIntent = new Intent();
-                    selectImageIntent.setType("image/*");
-                    selectImageIntent.setAction(Intent.ACTION_GET_CONTENT);
-                    startActivityForResult(selectImageIntent, IMG_REQUEST_CODE);
-                }); // set the ability for user to change their pfp now
             } else if(responseCode.equals(Constants.REAUTH_FLAG)) {
                 onAuthStateReset.performAuthReset();
             } else if(responseCode.contains(Constants.FAILED_FLAG)) {
